@@ -18,4 +18,13 @@ public class PermissionSummaryDTO {
     private String resourceShortDescription;
     private String resourceRelationshipType;
 
+    public static PermissionSummaryDTO of(FgaTupleDTO oneFgaTuple) {
+        return PermissionSummaryDTO.builder()
+            .subjectType(oneFgaTuple.subject().type().toString())
+            .subjectId(oneFgaTuple.subject().id())
+            .relationshipType(oneFgaTuple.relation().toString())
+            .resourceType(oneFgaTuple.object().type().toString())
+            .resourceId(oneFgaTuple.object().id())
+            .build();
+    }
 }

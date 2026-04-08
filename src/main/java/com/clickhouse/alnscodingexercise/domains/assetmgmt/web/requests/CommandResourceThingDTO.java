@@ -1,6 +1,6 @@
 package com.clickhouse.alnscodingexercise.domains.assetmgmt.web.requests;
 
-import com.clickhouse.alnscodingexercise.domains.iamplatform.authz.models.dtos.ProtectedObjectAclDTO;
+import com.clickhouse.alnscodingexercise.domains.iamplatform.authz.models.dtos.AssignableGrantsRequestDTO;
 import lombok.Builder;
 
 import java.util.List;
@@ -13,5 +13,8 @@ public record CommandResourceThingDTO(
     String summaryContent,
     String fullContent,
     String creatorUsername,
-    List<ProtectedObjectAclDTO> protectedObjectsAclsList
+
+    Boolean shouldIgnoreAclContent,
+
+    List<AssignableGrantsRequestDTO> assignableGrantsRequestsList
 ) { }

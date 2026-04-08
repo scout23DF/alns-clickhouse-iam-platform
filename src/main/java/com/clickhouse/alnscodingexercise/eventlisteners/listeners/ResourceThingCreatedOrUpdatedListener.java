@@ -11,6 +11,9 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
+import java.util.List;
+import java.util.Objects;
+
 @Component
 @RequiredArgsConstructor
 public class ResourceThingCreatedOrUpdatedListener implements ApplicationListener<OnResourceThingCreatedOrUpdatedEvent> {
@@ -95,15 +98,17 @@ public class ResourceThingCreatedOrUpdatedListener implements ApplicationListene
                                     String resourceThingId,
                                     String resourceRelationshipType) {
 
-        authorizationService.addFGAPermission(
+        authorizationService.addFGAPermissionsInBatch(List.of(
                 PermissionSummaryDTO.builder()
                         .subjectType(FgaObjectTypeEnum.USER.toString())
                         .subjectId(userId)
                         .relationshipType(relationshipType.toLowerCase())
                         .resourceType(FgaObjectTypeEnum.DOCUMENT.toString())
                         .resourceId(resourceThingId)
-                        .resourceRelationshipType(resourceRelationshipType.toLowerCase())
+                        .resourceRelationshipType((Objects.nonNull(resourceRelationshipType) ? resourceRelationshipType.toLowerCase() : null))
                         .build()
+
+            )
         );
 
     }

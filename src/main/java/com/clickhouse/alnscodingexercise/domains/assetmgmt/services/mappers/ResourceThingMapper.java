@@ -63,4 +63,23 @@ public class ResourceThingMapper {
         return userRepository.findByUsername(pUsername);
     }
 
+    public ResourceThing updateEntityWithCommandRequest(ResourceThing foundResourceThing,
+                                                        CommandResourceThingDTO commandResourceThing) {
+
+        if (commandResourceThing != null) {
+            foundResourceThing.setTitle(commandResourceThing.title());
+            foundResourceThing.setMetadata(commandResourceThing.metadata() + " :: [Updated]");
+            foundResourceThing.setSummaryContent(commandResourceThing.summaryContent() + " :: [Updated]");
+            foundResourceThing.setFullContent(commandResourceThing.fullContent() + " :: [Updated]");
+            foundResourceThing.setUpdatedAt(Instant.now());
+
+            if (StringUtils.isNotEmpty(commandResourceThing.creatorUsername())
+                && (!commandResourceThing.creatorUsername().equals(foundResourceThing.getUserCreator().getUsername()))
+                ) {
+                foundResourceThing.setUserCreator(getUsernameOf(commandResourceThing.creatorUsername()));
+            }
+        }
+
+        return foundResourceThing;
+    }
 }

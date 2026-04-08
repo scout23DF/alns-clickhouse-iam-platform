@@ -1,9 +1,7 @@
 package com.clickhouse.alnscodingexercise.domains.iamplatform.authz.validation;
 
 import com.clickhouse.alnscodingexercise.domains.assetmgmt.models.dtos.ResourceThingDTO;
-import com.clickhouse.alnscodingexercise.domains.iamplatform.authz.models.dtos.AllowedActionsDTO;
-import com.clickhouse.alnscodingexercise.domains.iamplatform.authz.models.dtos.PermissionSummaryDTO;
-import com.clickhouse.alnscodingexercise.domains.iamplatform.authz.models.dtos.ProtectedObjectAclDTO;
+import com.clickhouse.alnscodingexercise.domains.iamplatform.authz.models.dtos.*;
 import com.clickhouse.alnscodingexercise.domains.iamplatform.authz.models.enums.FgaObjectTypeEnum;
 import com.clickhouse.alnscodingexercise.domains.iamplatform.authz.models.enums.FgaRelationEnum;
 import com.clickhouse.alnscodingexercise.domains.iamplatform.authz.services.IAuthorizationService;
@@ -113,7 +111,7 @@ public class AuthorizationUtils {
     }
 
     public List<ProtectedObjectAclDTO> buildAccessControlListFrom(ResourceThingDTO resourceThingDTO,
-                                                                   List<ProtectedObjectAclDTO> sourcedProtectedObjecstAclsList,
+                                                                   List<AssignableGrantsRequestDTO> sourcedProtectedObjecstAclsList,
                                                                    List<String> filteredUsernamesList) {
 
         List<ProtectedObjectAclDTO> fgaProtectedObjectAclDTOList = new ArrayList<>();
@@ -124,21 +122,32 @@ public class AuthorizationUtils {
 
                 fgaProtectedObjectAclDTOList.add(
                         ProtectedObjectAclDTO.builder()
-                                .refenceObjectType(FgaObjectTypeEnum.DOCUMENT.toString())
+                                .referenceObjectType(FgaObjectTypeEnum.DOCUMENT.toString())
                                 .resourceId(resourceThingDTO.id())
                                 .subjectType(oneProtectedObjectAcl.subjectType())
                                 .subjectId(oneProtectedObjectAcl.subjectId())
                                 .rolesNamesRelationsList(oneProtectedObjectAcl.rolesNamesRelationsList())
                                 .allowedActions(
-                                        AllowedActionsDTO.builder()
-                                                .canChangeOwner(hasPermissionFor(FgaRelationEnum.CAN_CHANGE_OWNER, resourceThingDTO, oneProtectedObjectAcl))
-                                                .canWrite(hasPermissionFor(FgaRelationEnum.CAN_WRITE, resourceThingDTO, oneProtectedObjectAcl))
-                                                .canRead(hasPermissionFor(FgaRelationEnum.CAN_READ, resourceThingDTO, oneProtectedObjectAcl))
-                                                .canShare(hasPermissionFor(FgaRelationEnum.CAN_SHARE, resourceThingDTO, oneProtectedObjectAcl))
-                                                .canDelete(hasPermissionFor(FgaRelationEnum.CAN_DELETE, resourceThingDTO, oneProtectedObjectAcl))
-                                                .build()
-                                )
-                                .build()
+                                        authorizationService.getAllowedActionsOnObjectForUser(
+                                                PermissionSummaryDTO.builder()
+                                                        .resourceType(FgaObjectTypeEnum.DOCUMENT.toString())
+                                                        .resourceId(resourceThingDTO.id())
+                                                        .subjectType(oneProtectedObjectAcl.subjectType())
+                                                        .subjectId(oneProtectedObjectAcl.subjectId())
+                                                        .build()
+                                                /*
+                                                AllowedActionsDTO.builder()
+                                                        .objectType(oneProtectedObjectAcl.subjectType())
+                                                        .objectId(oneProtectedObjectAcl.subjectId())
+                                                        .canChangeOwner(hasPermissionFor(FgaRelationEnum.CAN_CHANGE_OWNER, resourceThingDTO, oneProtectedObjectAcl))
+                                                        .canWrite(hasPermissionFor(FgaRelationEnum.CAN_WRITE, resourceThingDTO, oneProtectedObjectAcl))
+                                                        .canRead(hasPermissionFor(FgaRelationEnum.CAN_READ, resourceThingDTO, oneProtectedObjectAcl))
+                                                        .canShare(hasPermissionFor(FgaRelationEnum.CAN_SHARE, resourceThingDTO, oneProtectedObjectAcl))
+                                                        .canDelete(hasPermissionFor(FgaRelationEnum.CAN_DELETE, resourceThingDTO, oneProtectedObjectAcl))
+                                                        .build()
+                                                */
+                                        )
+                                ).build()
                 );
 
             }
@@ -160,6 +169,76 @@ public class AuthorizationUtils {
                 oneProtectedObjectAcl.subjectId()
         );
 
+    }
+
+    public List<ProtectedObjectAclDTO> synchronizeAclOf(
+            Boolean shouldIgnoreAclContent,
+            ResourceThingDTO resourceThingDTO,
+            List<AssignableGrantsRequestDTO> sourcedAssignableGrantsList) {
+
+        List<ProtectedObjectAclDTO> synchronizedAclList = new ArrayList<>();
+
+        SearchGrantedSubjectsParamsDTO searchParams = SearchGrantedSubjectsParamsDTO.builder()
+                .resourceType(FgaObjectTypeEnum.DOCUMENT.toString())
+                .resourceId(resourceThingDTO.id())
+                .subjectType(FgaObjectTypeEnum.USER.toString())
+                .build();
+
+        List<String> permissionsAsStrList = authorizationService.searchGrantedSubjects(searchParams);
+
+        if (!shouldIgnoreAclContent && !CollectionUtils.isEmpty(sourcedAssignableGrantsList)) {
+
+            List<PermissionSummaryDTO> permissionSummaryDTOList = sourcedAssignableGrantsList.stream()
+                .flatMap(oneAssignableGrant -> {
+
+                    return oneAssignableGrant.rolesNamesRelationsList().stream()
+                        .map(oneRoleNameRelation -> PermissionSummaryDTO.builder()
+                            .resourceType(oneAssignableGrant.referenceObjectType())
+                            .resourceId(resourceThingDTO.id())
+                            .subjectType(oneAssignableGrant.subjectType())
+                            .subjectId(oneAssignableGrant.subjectId())
+                            .relationshipType(oneRoleNameRelation)
+                            .build()
+                        );
+
+                }).toList();
+
+            // Clean all Permissions for the given ResourceThing
+            try {
+                this.authorizationService.removeFGAPermissionsInBatch(permissionSummaryDTOList);
+            } catch (Exception e) {
+                logger.warn("**** Error when removing Permissions on FGA, but not throwing Exception  ****", e);
+            }
+
+            // Add the Permissions from on the cleaned ResourceThing
+            this.authorizationService.addFGAPermissionsInBatch(permissionSummaryDTOList);
+
+             synchronizedAclList = this.buildAccessControlListFrom(
+                     resourceThingDTO,
+                     sourcedAssignableGrantsList,
+                     List.of()
+             );
+
+        }
+
+        return synchronizedAclList;
+    }
+
+    public List<GenericObjectEnrichedWithACLDTO<ResourceThingDTO>> buildEnrichedObjectsWithACLFrom(
+            List<ResourceThingDTO> newResourcesThingsList,
+            List<String> usernamesList
+    ) {
+
+        return newResourcesThingsList.stream()
+                .map(resourceThingDTO -> GenericObjectEnrichedWithACLDTO.<ResourceThingDTO>builder()
+                        .itemProtected(resourceThingDTO)
+                        .protectedObjectsAclsList( this.buildAccessControlListFor(resourceThingDTO, usernamesList) )
+                        .build())
+                .toList();
+    }
+
+    public List<ProtectedObjectAclDTO> buildAccessControlListFor(ResourceThingDTO resourceThingDTO, List<String> usernamesList) {
+        return null;
     }
 
 }

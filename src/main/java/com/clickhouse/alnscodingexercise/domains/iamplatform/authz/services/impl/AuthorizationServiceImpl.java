@@ -1,9 +1,6 @@
 package com.clickhouse.alnscodingexercise.domains.iamplatform.authz.services.impl;
 
-import com.clickhouse.alnscodingexercise.domains.assetmgmt.models.dtos.ResourceThingDTO;
 import com.clickhouse.alnscodingexercise.domains.iamplatform.authz.models.dtos.*;
-import com.clickhouse.alnscodingexercise.domains.iamplatform.authz.models.enums.FgaObjectTypeEnum;
-import com.clickhouse.alnscodingexercise.domains.iamplatform.authz.models.enums.FgaRelationEnum;
 import com.clickhouse.alnscodingexercise.domains.iamplatform.authz.services.IAuthorizationService;
 import com.clickhouse.alnscodingexercise.domains.iamplatform.authz.services.impl.adapters.OpenFGAAdapter;
 import com.clickhouse.alnscodingexercise.wiring.config.OpenFgaProperties;
@@ -21,24 +18,12 @@ public class AuthorizationServiceImpl implements IAuthorizationService {
     private final OpenFGAAdapter openFGAAdapter;
 
     @Override
-    public void addFGAPermission(PermissionSummaryDTO permissionSummary) {
+    public void addFGAPermissionsInBatch(List<PermissionSummaryDTO> permissionSummaryDTOList) {
         ResultOperationOpenFgaDTO resultOperationOpenFgaDTO;
-        FgaTupleDTO fgaTuple;
 
-        fgaTuple = FgaTupleDTO.of(
-                FgaObjectDTO.of(
-                        FgaObjectTypeEnum.valueOf(permissionSummary.getSubjectType().toUpperCase()),
-                        permissionSummary.getSubjectId()
-                ),
-                FgaRelationEnum.valueOf(permissionSummary.getRelationshipType().toUpperCase()),
-                FgaObjectDTO.of(
-                        FgaObjectTypeEnum.valueOf(permissionSummary.getResourceType().toUpperCase()),
-                        permissionSummary.getResourceId()
-                        // , FgaRelationEnum.valueOf(permissionSummary.getResourceRelationshipType().toUpperCase())
-                )
+        resultOperationOpenFgaDTO = openFGAAdapter.createRelationshipsInBatch(
+                FgaTupleDTO.of(permissionSummaryDTOList)
         );
-
-        resultOperationOpenFgaDTO = openFGAAdapter.createRelationship(fgaTuple);
 
         if (resultOperationOpenFgaDTO.getOccurredException() != null) {
             throw new AuthorizationServiceException(
@@ -49,15 +34,16 @@ public class AuthorizationServiceImpl implements IAuthorizationService {
     }
 
     @Override
-    public void removeFGAPermission(PermissionSummaryDTO permissionSummary) {
+    public void removeFGAPermissionsInBatch(List<PermissionSummaryDTO> permissionSummaryDTOList) {
         ResultOperationOpenFgaDTO resultOperationOpenFgaDTO;
-        FgaTupleDTO fgaTuple = FgaTupleDTO.of(permissionSummary);
 
-        resultOperationOpenFgaDTO = openFGAAdapter.deleteRelationship(FgaTupleDTO.of(permissionSummary));
+        resultOperationOpenFgaDTO = openFGAAdapter.deleteRelationshipInBatch(
+                FgaTupleDTO.of(permissionSummaryDTOList)
+        );
 
         if (resultOperationOpenFgaDTO.getOccurredException() != null) {
             throw new AuthorizationServiceException(
-                    "Error performing FGA ReBAC deletion for FgaTuple: " + fgaTuple,
+                    "Error performing FGA ReBAC deletion for FgaTuples: " + FgaTupleDTO.of(permissionSummaryDTOList),
                     resultOperationOpenFgaDTO.getOccurredException()
             );
         }
@@ -107,6 +93,24 @@ public class AuthorizationServiceImpl implements IAuthorizationService {
         return resultOperationOpenFgaDTO.getCheckingResult();
     }
 
+    @Override
+    public AllowedActionsDTO getAllowedActionsOnObjectForUser(PermissionSummaryDTO userResourceToVerify) {
+
+        GenericResultOpenFgaDTO<AllowedActionsDTO> resultOperationOpenFgaDTO;
+
+        resultOperationOpenFgaDTO = openFGAAdapter.getAllowedActionsOf(userResourceToVerify);
+
+        if (resultOperationOpenFgaDTO.occurredException() != null) {
+            throw new AuthorizationServiceException(
+                    "Error getting Allowed Actions for: " + userResourceToVerify,
+                    resultOperationOpenFgaDTO.occurredException()
+            );
+        }
+
+        return resultOperationOpenFgaDTO.responseFromFga();
+    }
+
+
     private <TObjSearchParamsDTO> List<String> doSearchGenericGranted(TObjSearchParamsDTO searchGrantedGenericParamsDTO) {
         ResultOperationOpenFgaDTO resultOperationOpenFgaDTO;
 
@@ -126,26 +130,6 @@ public class AuthorizationServiceImpl implements IAuthorizationService {
     public void loadInitialFgaStructure(OpenFgaProperties openFgaProperties,
                                         ResourceLoader resourceLoader) throws Exception {
         this.openFGAAdapter.loadInitialFgaStructure(openFgaProperties, resourceLoader);
-    }
-
-    @Override
-    public List<GenericObjectEnrichedWithACLDTO<ResourceThingDTO>> buildEnrichedObjectsWithACLFrom(
-            List<ResourceThingDTO> newResourcesThingsList,
-            List<String> usernamesList
-    ) {
-
-        return newResourcesThingsList.stream()
-                .map(resourceThingDTO -> GenericObjectEnrichedWithACLDTO.<ResourceThingDTO>builder()
-                        .itemProtected(resourceThingDTO)
-                        .protectedObjectsAclsList( this.buildAccessControlListFor(resourceThingDTO, usernamesList) )
-                        .build())
-                .toList();
-    }
-
-    @Override
-    public List<ProtectedObjectAclDTO> buildAccessControlListFor(ResourceThingDTO resourceThingDTO, List<String> usernamesList) {
-
-        return null;
     }
 
 }

@@ -1,0 +1,8 @@
+include:
+  - src/main/docker/networks-settings.yaml
+  - src/main/docker/services-base-01-dbs-engines.yaml
+  - src/main/docker/services-base-02-smtp-server.yaml
+  - src/main/docker/services-base-03-iam-openfga.yaml
+  # - src/main/docker/services-base-04-iam-keycloak.yaml
+  - src/main/docker/services-base-05-dbs-webclient.yaml
+  - src/main/docker/services-base-99-provisioners.yaml

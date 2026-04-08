@@ -13,6 +13,8 @@ import org.jspecify.annotations.NonNull;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 @RequiredArgsConstructor
 public class RegistrationCompletedListener implements ApplicationListener<OnRegistrationCompletedEvent> {
@@ -30,7 +32,7 @@ public class RegistrationCompletedListener implements ApplicationListener<OnRegi
         CHUserAccount.setEnabled(true);
         userRepository.saveAndFlush(CHUserAccount);
 
-        authorizationService.addFGAPermission(
+        authorizationService.addFGAPermissionsInBatch(List.of(
                 PermissionSummaryDTO.builder()
                         .subjectType(FgaObjectTypeEnum.USER.toString())
                         .subjectId(CHUserAccount.getUsername())
@@ -40,6 +42,7 @@ public class RegistrationCompletedListener implements ApplicationListener<OnRegi
                         .resourceId(AppConstants.DEFAULT_RESOURCE_ID)
                         .resourceShortDescription(AppConstants.DEFAULT_RESOURCE_SHORT_DESCRIPTION)
                         .build()
+                )
         );
 
     }

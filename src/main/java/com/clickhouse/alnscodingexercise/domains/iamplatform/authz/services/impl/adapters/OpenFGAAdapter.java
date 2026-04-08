@@ -7,11 +7,14 @@ import com.clickhouse.alnscodingexercise.domains.iamplatform.authz.services.impl
 import com.clickhouse.alnscodingexercise.wiring.config.OpenFgaProperties;
 import dev.openfga.sdk.api.client.OpenFgaClient;
 import dev.openfga.sdk.api.client.model.*;
+import dev.openfga.sdk.api.configuration.ClientBatchCheckOptions;
 import dev.openfga.sdk.errors.FgaInvalidParameterException;
+import dev.openfga.sdk.errors.FgaValidationError;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -25,6 +28,7 @@ public class OpenFGAAdapter {
 
     private final OpenFgaClient openFgaClient;
     private final LoadInitialFgaDataHelper loadInitialFgaDataHelper;
+    private final OpenFgaProperties openFgaProperties;
 
 
     public ResultOperationOpenFgaDTO createRelationship(String objectId,
@@ -43,22 +47,31 @@ public class OpenFGAAdapter {
     }
 
     public ResultOperationOpenFgaDTO createRelationship(FgaTupleDTO tuple) {
+        return createRelationshipsInBatch(List.of(tuple));
+    }
+
+    public ResultOperationOpenFgaDTO createRelationshipsInBatch(List<FgaTupleDTO> fgaTuplesToAddList) {
 
         ResultOperationOpenFgaDTO resultOperationOpenFga = null;
         ClientWriteResponse clientWriteResponse = null;
 
         try {
+            List<ClientTupleKey> clientTupleKeysList = fgaTuplesToAddList.stream()
+                    .map(FgaTupleDTO::toClientTupleKey)
+                    .toList();
 
-            clientWriteResponse = openFgaClient.writeTuples(List.of(tuple.toClientTupleKey())).get();
+            clientWriteResponse = openFgaClient.writeTuples(clientTupleKeysList).get();
             resultOperationOpenFga = buildResultOperationFromClientResponse(
-                    "ADDED",
-                    tuple,
+                    "ADDED_IN_BATCH",
+                    fgaTuplesToAddList.stream()
+                            .map(PermissionSummaryDTO::of)
+                            .toList(),
                     clientWriteResponse
             );
 
         } catch (FgaInvalidParameterException | InterruptedException | ExecutionException e) {
 
-            resultOperationOpenFga = buildOperationResultFromException("ADDED", tuple, e);
+            resultOperationOpenFga = buildOperationResultFromException("ADDED_IN_BATCH", fgaTuplesToAddList, e);
 
         }
 
@@ -67,23 +80,37 @@ public class OpenFGAAdapter {
         return resultOperationOpenFga;
     }
 
-    public ResultOperationOpenFgaDTO deleteRelationship(FgaTupleDTO tuple) {
+    public ResultOperationOpenFgaDTO deleteRelationship(FgaTupleDTO tupleToDelete) {
+        return deleteRelationshipInBatch(List.of(tupleToDelete));
+    }
+
+    public ResultOperationOpenFgaDTO deleteRelationshipInBatch(List<FgaTupleDTO> fgaTuplesToDeleteList) {
 
         ResultOperationOpenFgaDTO resultOperationOpenFga = null;
         ClientWriteResponse clientWriteResponse = null;
 
         try {
+            List<ClientTupleKeyWithoutCondition> clientTupleKeysList = fgaTuplesToDeleteList.stream()
+                    .map(FgaTupleDTO::toClientTupleKey)
+                    .map(tupleKey -> new ClientTupleKeyWithoutCondition()
+                            .user(tupleKey.getUser())
+                            .relation(tupleKey.getRelation())
+                            ._object(tupleKey.getObject())
+                    )
+                    .toList();
 
-            clientWriteResponse = openFgaClient.deleteTuples(List.of(tuple.toClientTupleKey())).get();
+            clientWriteResponse = openFgaClient.deleteTuples(clientTupleKeysList).get();
             resultOperationOpenFga = buildResultOperationFromClientResponse(
-                    "DELETED",
-                    tuple,
+                    "DELETED_IN_BATCH",
+                    fgaTuplesToDeleteList.stream()
+                            .map(PermissionSummaryDTO::of)
+                            .toList(),
                     clientWriteResponse
             );
 
         } catch (FgaInvalidParameterException | InterruptedException | ExecutionException e) {
 
-            resultOperationOpenFga = buildOperationResultFromException("DELETED", tuple, e);
+            resultOperationOpenFga = buildOperationResultFromException("DELETED_IN_BATCH", fgaTuplesToDeleteList, e);
 
         }
 
@@ -141,68 +168,63 @@ public class OpenFGAAdapter {
     public <TObjSearchParamsDTO> ResultOperationOpenFgaDTO getObjects(TObjSearchParamsDTO searchParamsDTO) {
 
         ResultOperationOpenFgaDTO resultOperationOpenFga = null;
-        ClientListObjectsRequest clientListObjectsRequest = null;
-        ClientListObjectsResponse clientListObjectsResponse = null;
-        FgaTupleDTO fgaTupleDTO = null;
+        ClientReadRequest clientReadRequest = null;
+        ClientReadResponse clientReadResponse = null;
+        PermissionSummaryDTO permissionSummaryDTO = null;
 
         try {
 
             switch (searchParamsDTO) {
                 case SearchGrantedResourcesParamsDTO searchGrantedResourcesParams -> {
-                    clientListObjectsRequest = new ClientListObjectsRequest()
-                        .user(searchGrantedResourcesParams.getSubjectId())
-                        .relation(searchGrantedResourcesParams.getRelationshipType())
-                        .type(searchGrantedResourcesParams.getResourceType());
+                    clientReadRequest = new ClientReadRequest()
+                            .user(
+                                searchGrantedResourcesParams.getSubjectType()
+                                + ":" +
+                                searchGrantedResourcesParams.getSubjectId()
+                            );
 
-                    fgaTupleDTO = FgaTupleDTO.of(
-                            FgaObjectDTO.of(
-                                    FgaObjectTypeEnum.valueOf(searchGrantedResourcesParams.getSubjectType().toLowerCase()),
-                                    searchGrantedResourcesParams.getSubjectId()
-                            ),
-                            FgaRelationEnum.valueOf(searchGrantedResourcesParams.getRelationshipType()),
-                            FgaObjectDTO.of(
-                                    FgaObjectTypeEnum.valueOf(searchGrantedResourcesParams.getResourceType().toLowerCase()),
-                                    "[All]"
-                            )
-                    );
+                    permissionSummaryDTO = PermissionSummaryDTO.builder()
+                            .subjectType(searchGrantedResourcesParams.getSubjectType())
+                            .subjectId(searchGrantedResourcesParams.getSubjectId())
+                            .relationshipType(searchGrantedResourcesParams.getRelationshipType())
+                            .build();
                 }
 
                 case SearchGrantedSubjectsParamsDTO searchGrantedSubjectsParams -> {
-                    clientListObjectsRequest = new ClientListObjectsRequest()
-                            .context(searchGrantedSubjectsParams.getResourceId())
-                            .relation(searchGrantedSubjectsParams.getRelationshipType())
-                            .type(searchGrantedSubjectsParams.getSubjectType());
+                    clientReadRequest = new ClientReadRequest()
+                            ._object(
+                                searchGrantedSubjectsParams.getResourceType()
+                                + ":" +
+                                searchGrantedSubjectsParams.getResourceId()
+                            );
 
-                    fgaTupleDTO = FgaTupleDTO.of(
-                            FgaObjectDTO.of(
-                                    FgaObjectTypeEnum.valueOf(searchGrantedSubjectsParams.getSubjectType().toLowerCase()),
-                                    "[All]"
-                            ),
-                            FgaRelationEnum.valueOf(searchGrantedSubjectsParams.getRelationshipType()),
-                            FgaObjectDTO.of(
-                                    FgaObjectTypeEnum.valueOf(searchGrantedSubjectsParams.getResourceType().toLowerCase()),
-                                    searchGrantedSubjectsParams.getResourceId()
-                            )
-                    );
+                    permissionSummaryDTO = PermissionSummaryDTO.builder()
+                            .resourceType(searchGrantedSubjectsParams.getResourceType())
+                            .resourceId(searchGrantedSubjectsParams.getResourceId())
+                            .relationshipType(searchGrantedSubjectsParams.getRelationshipType())
+                            .build();
 
                 }
 
                 case SearchGrantedRelationsParamsDTO searchGrantedRelationsParams -> {
-                    clientListObjectsRequest = new ClientListObjectsRequest()
-                            .user(searchGrantedRelationsParams.getSubjectId())
-                            .context(searchGrantedRelationsParams.getResourceId());
-
-                    fgaTupleDTO = FgaTupleDTO.of(
-                            FgaObjectDTO.of(
-                                    FgaObjectTypeEnum.valueOf(searchGrantedRelationsParams.getSubjectType().toLowerCase()),
-                                    searchGrantedRelationsParams.getSubjectId()
-                            ),
-                            null,
-                            FgaObjectDTO.of(
-                                    FgaObjectTypeEnum.valueOf(searchGrantedRelationsParams.getResourceType().toLowerCase()),
-                                    searchGrantedRelationsParams.getResourceId()
-                            )
+                    clientReadRequest = new ClientReadRequest()
+                        .user(
+                            searchGrantedRelationsParams.getSubjectType()
+                            + ":" +
+                            searchGrantedRelationsParams.getSubjectId()
+                        )
+                        ._object(
+                            searchGrantedRelationsParams.getResourceType()
+                            + ":" +
+                            searchGrantedRelationsParams.getResourceId()
                     );
+
+                    permissionSummaryDTO = PermissionSummaryDTO.builder()
+                            .subjectType(searchGrantedRelationsParams.getSubjectType())
+                            .subjectId(searchGrantedRelationsParams.getSubjectId())
+                            .resourceType(searchGrantedRelationsParams.getResourceType())
+                            .resourceId(searchGrantedRelationsParams.getResourceId())
+                            .build();
 
                 }
 
@@ -212,12 +234,13 @@ public class OpenFGAAdapter {
 
             }
 
-            clientListObjectsResponse = openFgaClient.listObjects(clientListObjectsRequest).get();
-            assert fgaTupleDTO != null;
+            clientReadResponse = openFgaClient.read(clientReadRequest).get();
+
+            assert permissionSummaryDTO != null;
             resultOperationOpenFga = buildResultOperationFromClientResponse(
                     "LISTED_OBJECTS",
-                    fgaTupleDTO,
-                    clientListObjectsResponse
+                    List.of(permissionSummaryDTO),
+                    clientReadResponse
             );
 
         } catch (FgaInvalidParameterException | InterruptedException | ExecutionException e) {
@@ -245,60 +268,74 @@ public class OpenFGAAdapter {
                                                                                    String userId,
                                                                                    TObjClientResponse clientResponse) {
 
-        FgaTupleDTO fgaTupleDTO = FgaTupleDTO.of(
-                FgaObjectDTO.of(FgaObjectTypeEnum.valueOf(objectType.toUpperCase()), objectId),
-                FgaRelationEnum.valueOf(relation.toUpperCase()),
-                FgaObjectDTO.of(FgaObjectTypeEnum.valueOf(userType.toUpperCase()), userId)
-        );
+        PermissionSummaryDTO permissionSummaryDTO = PermissionSummaryDTO.builder()
+                .subjectType(userType)
+                .subjectId(userId)
+                .relationshipType(relation)
+                .resourceType(objectType)
+                .resourceId(objectId)
+                .build();
 
-        return buildResultOperationFromClientResponse(operationName, fgaTupleDTO, clientResponse);
+        return buildResultOperationFromClientResponse(operationName, List.of(permissionSummaryDTO), clientResponse);
 
     }
 
     private <TObjClientResponse> ResultOperationOpenFgaDTO buildResultOperationFromClientResponse(
             String operationNameForLogger,
-            FgaTupleDTO tuple,
+            List<PermissionSummaryDTO> permissionsSummaryList,
             TObjClientResponse clientResponse
     ) {
         ResultOperationOpenFgaDTO.ResultOperationOpenFgaDTOBuilder resultBuilder = ResultOperationOpenFgaDTO.builder();
         String templateMessageToLog = """
-                \n ================================================================ \n 
-                | ==> OpenFGA : Successfully %s the following ReBAC Permission: \n
-                | \t - Relationship type = '%s' \n
-                | On: \n 
-                | \t - Resource: type = '%s' :: Id = '%s' \n
-                | To: \n 
-                | \t - User: type = '%s' :: Id = '%s' \n 
-                | ================================================================ \n ";
+                ================================================================
+                | ==> OpenFGA : Successfully %s the following ReBAC Permission:
+                | - Relationship type = '%s'
+                | On:
+                | - Resource: type = '%s' :: Id = '%s'
+                | To:
+                | - User: type = '%s' :: Id = '%s'
+                | ================================================================
                 """;
 
-        String messageToLogFulfilled = String.format(
-                templateMessageToLog,
-                operationNameForLogger,
-                tuple.relation().toString(),
-                tuple.object().type().toString(),
-                tuple.object().id(),
-                tuple.subject().type().toString(),
-                tuple.subject().id()
-        );
+        StringBuilder stbMessageToLog = new StringBuilder();
+        permissionsSummaryList.forEach(onePermissionSummary -> {
+            stbMessageToLog.append(
+                   String.format(
+                   templateMessageToLog,
+                   operationNameForLogger,
+                   onePermissionSummary.getRelationshipType(),
+                   onePermissionSummary.getResourceType(),
+                   onePermissionSummary.getResourceId(),
+                   onePermissionSummary.getResourceType(),
+                   onePermissionSummary.getSubjectId()
+                   )
+            );
+            stbMessageToLog.append("\n");
+        });
 
         switch (clientResponse) {
             case ClientWriteResponse response -> resultBuilder
                     .statusCode(response.getStatusCode())
                     .rawResponse(response.getRawResponse())
-                    .messageToLog(messageToLogFulfilled);
+                    .messageToLog(stbMessageToLog.toString());
 
             case ClientCheckResponse response -> resultBuilder
                     .statusCode(response.getStatusCode())
                     .rawResponse(response.getRawResponse())
                     .checkingResult(response.getAllowed())
-                    .messageToLog(messageToLogFulfilled);
+                    .messageToLog(stbMessageToLog.toString());
 
             case ClientListObjectsResponse response -> resultBuilder
                     .statusCode(response.getStatusCode())
                     .rawResponse(response.getRawResponse())
                     .foundObjectsList(response.getObjects())
-                    .messageToLog(messageToLogFulfilled);
+                    .messageToLog(stbMessageToLog.toString());
+
+            case ClientReadResponse response -> resultBuilder
+                    .statusCode(response.getStatusCode())
+                    .rawResponse(response.getRawResponse())
+                    .foundObjectsList(List.of(response.getRawResponse()))
+                    .messageToLog(stbMessageToLog.toString());
 
             default -> {
                 // Keep behavior: do nothing for unsupported response types.
@@ -310,34 +347,40 @@ public class OpenFGAAdapter {
 
     private ResultOperationOpenFgaDTO buildOperationResultFromException(
             String operationNameForLogger,
-            FgaTupleDTO fgaTuple,
+            List<FgaTupleDTO> fgaTuplesList,
             Exception occurredException
     ) {
 
         ResultOperationOpenFgaDTO.ResultOperationOpenFgaDTOBuilder resultBuilder = ResultOperationOpenFgaDTO.builder();
         String templateMessageToLog = """
-                \n ================================================================ \n
-                | ==> OpenFGA : The operation '%s' has failed for the following ReBAC Permission: \n
-                | \t - Relationship type = '%s' \n 
-                | On: \n  
-                | \t - Resource: type = '%s' :: Id = '%s' \n" 
-                | To: \n 
-                | \t - User: type = '%s' :: Id = '%s' \n 
-                ================================================================ \n ;
+                ================================================================
+                | ==> OpenFGA : The operation '%s' has failed for the following ReBAC Permission:
+                | - Relationship type = '%s'
+                | On:
+                | - Resource: type = '%s' :: Id = '%s' 
+                | To:
+                | - User: type = '%s' :: Id = '%s' 
+                ================================================================
                 """;
 
-        String messageToLogFulfilled = String.format(
-                templateMessageToLog,
-                operationNameForLogger,
-                fgaTuple.relation().toString(),
-                fgaTuple.object().type().toString(),
-                fgaTuple.object().id(),
-                fgaTuple.subject().type().toString(),
-                fgaTuple.subject().id()
-        );
+        StringBuilder stbMessageToLog = new StringBuilder();
+        fgaTuplesList.forEach(fgaTuple -> {
+            stbMessageToLog.append(
+                    String.format(
+                            templateMessageToLog,
+                            operationNameForLogger,
+                            fgaTuple.relation().toString(),
+                            fgaTuple.object().type().toString(),
+                            fgaTuple.object().id(),
+                            fgaTuple.subject().type().toString(),
+                            fgaTuple.subject().id()
+                    )
+            );
+            stbMessageToLog.append("\n");
+        });
 
         resultBuilder.occurredException(occurredException)
-                .messageToLog(messageToLogFulfilled);
+                .messageToLog(stbMessageToLog.toString());
 
         return resultBuilder.build();
     }
@@ -369,11 +412,11 @@ public class OpenFGAAdapter {
 
         ResultOperationOpenFgaDTO.ResultOperationOpenFgaDTOBuilder resultBuilder = ResultOperationOpenFgaDTO.builder();
         String templateMessageToLog = """
-                \n ================================================================ \n 
+                ================================================================ 
                 | ==> OpenFGA : The operation '%s' has failed for the following ReBAC Permission: 
-                | \t - Search Params: \n
-                | %s \n
-                | ================================================================ \n
+                | - Search Params:
+                | %s
+                ================================================================
                 """;
 
         String messageToLogFulfilled = String.format(
@@ -396,4 +439,106 @@ public class OpenFGAAdapter {
             resourceLoader
         );
     }
+
+    public GenericResultOpenFgaDTO<AllowedActionsDTO> getAllowedActionsOf(PermissionSummaryDTO userResourceTuple) {
+
+        GenericResultOpenFgaDTO<AllowedActionsDTO> resultOperationOpenFga = null;
+        ClientBatchCheckRequest clientBatchCheckRequest = null;
+        ClientBatchCheckResponse clientBatchCheckResponse = null;
+
+        try {
+
+            clientBatchCheckRequest = new ClientBatchCheckRequest().checks(
+                    List.of(
+                            new ClientBatchCheckItem()
+                                    .user(userResourceTuple.getSubjectType() + ":" + userResourceTuple.getSubjectId())
+                                    .relation(FgaRelationEnum.CAN_CHANGE_OWNER.toString())
+                                    ._object(userResourceTuple.getResourceType() + ":" + userResourceTuple.getResourceId())
+                                    .correlationId("1"),
+                            new ClientBatchCheckItem()
+                                    .user(userResourceTuple.getSubjectType() + ":" + userResourceTuple.getSubjectId())
+                                    .relation(FgaRelationEnum.CAN_WRITE.toString())
+                                    ._object(userResourceTuple.getResourceType() + ":" + userResourceTuple.getResourceId())
+                                    .correlationId("2"),
+                            new ClientBatchCheckItem()
+                                    .user(userResourceTuple.getSubjectType() + ":" + userResourceTuple.getSubjectId())
+                                    .relation(FgaRelationEnum.CAN_READ.toString())
+                                    ._object(userResourceTuple.getResourceType() + ":" + userResourceTuple.getResourceId())
+                                    .correlationId("3"),
+                            new ClientBatchCheckItem()
+                                    .user(userResourceTuple.getSubjectType() + ":" + userResourceTuple.getSubjectId())
+                                    .relation(FgaRelationEnum.CAN_SHARE.toString())
+                                    ._object(userResourceTuple.getResourceType() + ":" + userResourceTuple.getResourceId())
+                                    .correlationId("4"),
+                            new ClientBatchCheckItem()
+                                    .user(userResourceTuple.getSubjectType() + ":" + userResourceTuple.getSubjectId())
+                                    .relation(FgaRelationEnum.CAN_DELETE.toString())
+                                    ._object(userResourceTuple.getResourceType() + ":" + userResourceTuple.getResourceId())
+                                    .correlationId("5")
+                    )
+            );
+
+            var options = new ClientBatchCheckOptions()
+                    .authorizationModelId(openFgaProperties.getFgaAuthorizationModelId()) // optional, can be set at client level or per request
+                    .maxBatchSize(50) // optional, default is 50, can be used to limit the number of checks in a single server request
+                    .maxParallelRequests(10); // optional, default is 10, can be used to limit the parallelization of the BatchCheck chunks
+
+            clientBatchCheckResponse = openFgaClient.batchCheck(clientBatchCheckRequest, options).get();
+
+            AllowedActionsDTO allowedActions = AllowedActionsDTO.builder()
+                    .canChangeOwner(getAssertionByCorrelationIndex(clientBatchCheckResponse, 1))
+                    .canWrite(getAssertionByCorrelationIndex(clientBatchCheckResponse, 2))
+                    .canRead(getAssertionByCorrelationIndex(clientBatchCheckResponse, 3))
+                    .canShare(getAssertionByCorrelationIndex(clientBatchCheckResponse, 4))
+                    .canDelete(getAssertionByCorrelationIndex(clientBatchCheckResponse, 5))
+                    .build();
+
+            resultOperationOpenFga = GenericResultOpenFgaDTO.<AllowedActionsDTO>builder()
+                    .responseFromFga(allowedActions)
+                    .httpStatusCode(HttpStatus.OK.value())
+                    .messageToLog(String.format(
+                            """
+                            ================================================================
+                            | ==> OpenFGA : Successfully CHECKED the allowed actions for the user '%s:%s' on the resource '%s:%s' with the following results:
+                            | - canChangeOwner = %s
+                            | - canWrite = %s
+                            | - canRead = %s
+                            | - canShare = %s
+                            | - canDelete = %s
+                            ================================================================
+                            """,
+                            userResourceTuple.getSubjectType(),
+                            userResourceTuple.getSubjectId(),
+                            userResourceTuple.getResourceType(),
+                            userResourceTuple.getResourceId(),
+                            allowedActions.canChangeOwner(),
+                            allowedActions.canWrite(),
+                            allowedActions.canRead(),
+                            allowedActions.canShare(),
+                            allowedActions.canDelete()
+                    ))
+                    .build();
+
+        } catch (FgaInvalidParameterException | InterruptedException | ExecutionException | FgaValidationError e) {
+
+            resultOperationOpenFga = GenericResultOpenFgaDTO.<AllowedActionsDTO>builder()
+                    .httpStatusCode(HttpStatus.BAD_REQUEST.value())
+                    .occurredException(e)
+                    .messageToLog(e.getMessage())
+                    .build();
+
+        }
+
+        return resultOperationOpenFga;
+
+    }
+
+    private Boolean getAssertionByCorrelationIndex(ClientBatchCheckResponse clientBatchCheckResponse, int index) {
+        return clientBatchCheckResponse.getResult().stream()
+                .filter(result -> result.getCorrelationId().equals(String.valueOf(index)))
+                .findFirst()
+                .map(ClientBatchCheckSingleResponse::isAllowed)
+                .orElseThrow(() -> new RuntimeException("No assertion found in BatchCheckResponse for correlationId: " + index));
+    }
+
 }

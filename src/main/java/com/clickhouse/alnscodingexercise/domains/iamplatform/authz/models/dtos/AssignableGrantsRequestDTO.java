@@ -5,15 +5,12 @@ import lombok.Builder;
 import java.util.List;
 
 @Builder(toBuilder = true)
-public record ProtectedObjectAclDTO(
+public record AssignableGrantsRequestDTO(
     String referenceObjectType,
     String resourceId,
     String subjectType,
     String subjectId,
 
-    AllowedActionsDTO allowedActions,
-
     List<String> rolesNamesRelationsList
-    // List<String> grantedPermissionsRelationsList
 
 ) {}

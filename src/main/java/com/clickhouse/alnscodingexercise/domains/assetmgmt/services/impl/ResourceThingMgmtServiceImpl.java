@@ -8,6 +8,7 @@ import com.clickhouse.alnscodingexercise.domains.assetmgmt.services.mappers.Reso
 import com.clickhouse.alnscodingexercise.domains.assetmgmt.web.requests.CommandResourceThingDTO;
 import com.clickhouse.alnscodingexercise.domains.iamplatform.account.repositories.UserRepository;
 import com.clickhouse.alnscodingexercise.domains.iamplatform.authz.models.dtos.GenericObjectEnrichedWithACLDTO;
+import com.clickhouse.alnscodingexercise.domains.iamplatform.authz.models.dtos.ProtectedObjectAclDTO;
 import com.clickhouse.alnscodingexercise.domains.iamplatform.authz.services.IAuthorizationService;
 import com.clickhouse.alnscodingexercise.domains.iamplatform.authz.validation.AuthorizationUtils;
 import com.clickhouse.alnscodingexercise.domains.shared.models.enums.GenericOperationResultEnum;
@@ -33,21 +34,7 @@ public class ResourceThingMgmtServiceImpl implements IResourceThingMgmtService {
 
     @Override
     public ResourceThingDTO createResourceThing(CommandResourceThingDTO commandResourceThing) {
-
-        ResourceThing newResourceThing = resourceThingMapper.commandRequestToEntity(commandResourceThing);
-
-        resourceThingRepository.save(newResourceThing);
-
-        ResourceThingDTO resourceThingDTO = resourceThingMapper.entityToDTO(newResourceThing);
-
-        eventPublisher.publishEvent(
-                OnResourceThingCreatedOrUpdatedEvent.builder()
-                        .resourceThingDTO(resourceThingDTO)
-                        .accessControlList(commandResourceThing.protectedObjectsAclsList())
-                        .build()
-        );
-
-        return resourceThingDTO;
+        return doCreateOrUpdateResourceThing(commandResourceThing, true);
     }
 
     @Override
@@ -58,18 +45,20 @@ public class ResourceThingMgmtServiceImpl implements IResourceThingMgmtService {
         List<String> filteredUsernamesList = List.of();
 
         commandsResourceThingsDTOList.forEach(oneCommandResourceThing -> {
-            ResourceThingDTO resourceThingDTO =this.createResourceThing(oneCommandResourceThing);
+
+            ResourceThingDTO resourceThingDTO = this.doCreateOrUpdateResourceThing(oneCommandResourceThing, false);
+
+            List<ProtectedObjectAclDTO> aclListOfResourceList = authorizationUtils.synchronizeAclOf(
+                    oneCommandResourceThing.shouldIgnoreAclContent(),
+                    resourceThingDTO,
+                    oneCommandResourceThing.assignableGrantsRequestsList()
+            );
 
             enrichedWithACLDTOList.add(
                     GenericObjectEnrichedWithACLDTO.<ResourceThingDTO>builder()
                             .itemProtected(resourceThingDTO)
-                            .protectedObjectsAclsList(
-                                    authorizationUtils.buildAccessControlListFrom(
-                                            resourceThingDTO,
-                                            oneCommandResourceThing.protectedObjectsAclsList(),
-                                            filteredUsernamesList
-                                    )
-                            ).build()
+                            .protectedObjectsAclsList(aclListOfResourceList)
+                            .build()
             );
         });
 
@@ -96,6 +85,41 @@ public class ResourceThingMgmtServiceImpl implements IResourceThingMgmtService {
     public List<GenericObjectEnrichedWithACLDTO<ResourceThingDTO>> searchByContainingTextWithACL(String searchText,
                                                                                                  String propertyToSearchUpon) {
         return List.of();
+    }
+
+    private ResourceThingDTO doCreateOrUpdateResourceThing(CommandResourceThingDTO commandResourceThing,
+                                                           boolean shouldTriggerPermissionsEvent) {
+
+        ResourceThing persistableEntity;
+
+        ResourceThingDTO resourceThingDTOResult = resourceThingRepository.findById(commandResourceThing.id())
+                .map(foundResourceThing -> {
+
+                    ResourceThing updatedResourceThing = resourceThingMapper.updateEntityWithCommandRequest(
+                            foundResourceThing, commandResourceThing
+                    );
+                    resourceThingRepository.save(updatedResourceThing);
+                    return resourceThingMapper.entityToDTO(updatedResourceThing);
+
+                })
+                . orElseGet(() -> {
+
+                    ResourceThing foundResourceThing = resourceThingMapper.commandRequestToEntity(commandResourceThing);
+                    resourceThingRepository.save(foundResourceThing);
+                    return resourceThingMapper.entityToDTO(foundResourceThing);
+
+                });
+
+        if (shouldTriggerPermissionsEvent) {
+            eventPublisher.publishEvent(
+                    OnResourceThingCreatedOrUpdatedEvent.builder()
+                            .resourceThingDTO(resourceThingDTOResult)
+                            .accessControlList(commandResourceThing.assignableGrantsRequestsList())
+                            .build()
+            );
+        }
+
+        return resourceThingDTOResult;
     }
 
 }

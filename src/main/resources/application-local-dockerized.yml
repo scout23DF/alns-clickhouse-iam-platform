@@ -30,7 +30,7 @@ spring:
     jpa:
         properties:
             hibernate:
-                show_sql: true
+                show_sql: false
                 format_sql: true
     thymeleaf: # Thymeleaf configuration
         cache: false # Enable or disable Thymeleaf cache
@@ -55,4 +55,4 @@ openfga:
     fga-api-url: http://alnsclickhousetest-infra-openfga-server:8080
     # fga-store-id: 01KNBXTRD2Q49YDQE6W94018X8
     # fga-authorization-model-id: 01KNBXW5EW2CPZ6G9PFTBJ1VVT
-    fga-should-import-initial-structure: true
+    # fga-should-import-initial-structure: false

@@ -1,17 +1,18 @@
-debug: true # Enable or disable debug mode
+debug: false # Enable or disable debug mode
 
 logging:
     level:
+        root: INFO
         com:
             clickhouse:
                 alnscodingexercise: DEBUG
         org:
             springframework:
-                security: DEBUG
+                security: INFO
                 web:
                     filter:
-                        CommonsRequestLoggingFilter: DEBUG
-                    nodeValue: DEBUG
+                        CommonsRequestLoggingFilter: INFO
+                    nodeValue: INFO
     file:
         # name: ./logs/alns-clickhouse-app.log # The path to the application log file.
         path: ./logs/alns-clickhouse-app.log # The path to the application log file.
@@ -64,7 +65,7 @@ spring:
                 query:
                     fail_on_pagination_over_collection_fetch: true
                     in_clause_parameter_padding: true
-                show_sql: true
+                show_sql: false
                 format_sql: true
                 dialect: org.hibernate.dialect.PostgreSQLDialect
     data:
@@ -147,9 +148,6 @@ management:
                     - loggers
                     - threaddump
 
-# hibernate:
-#     globally_quoted_identifiers: "false" # Hibernate Globally quoted identifiers
-
 springdoc:
     swagger-ui:
         path: /swagger-ui.html
@@ -177,10 +175,10 @@ purge:
 
 openfga:
     fga-api-url: http://localhost:8080
-    # fga-store-id: 01KNBXTRD2Q49YDQE6W94018X8
+    fga-store-id: 01KNPEF94P3M84GPHNZBH0RSD2
     fga-store-name: clickhouse-iam-fga-store
-    # fga-authorization-model-id: 01KNBXW5EW2CPZ6G9PFTBJ1VVT
-    fga-should-import-initial-structure: true
+    fga-authorization-model-id: 01KNPEF9DK0ZAM18RM1YAN6SJP
+    fga-should-import-initial-structure: false
     fga-initial-model-schema-to-import: classpath:openfga/initial-model-tuples-data/domain-assetmgmt-resourcething-model-schema.json
     fga-initial-relationship-tuples-to-import:
         - classpath:openfga/initial-model-tuples-data/domain-assetmgmt-resourcething-tuples-example-data.json
