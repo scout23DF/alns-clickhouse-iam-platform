@@ -1,0 +1,44 @@
+services:
+
+  alnsclickhousetest-apps-iam-platform:
+    image: alns-clickhouse-iam-platform:latest
+    hostname: alns-clickhouse-iam-platform
+    container_name: alns-clickhouse-iam-platform
+    user: spring:spring
+    build:
+      context: ../../../
+      dockerfile: Dockerfile
+      # context: ./app-dockerizing
+      # dockerfile: Dockerfile
+    environment:
+      SERVER_PORT: ${ENV_SPRING_APP_SERVER_PORT:-8090}
+      SPRING_PROFILES_ACTIVE: local-dockerized
+      # SPRING_DATASOURCE_URL: jdbc:postgresql://alnsclickhousetest-infra-postgresql:5432/DBIAMPlatform?createDatabaseIfNotExist=true
+      # SPRING_DATASOURCE_USERNAME: dbaiamplatform01
+      # SPRING_DATASOURCE_PASSWORD: 1a88a1
+      # SPRING_MAIL_HOST: alnsclickhousetest-infra-mailhog
+      # SPRING_MAIL_PORT: 1025
+      # OPENFGA_FGAAPIURL: http://alnsclickhousetest-infra-openfga-server:8080
+      # OPENFGA_FGASTOREID: 01KNBXTRD2Q49YDQE6W94018X8
+      # OPENFGA_FGAAUTHORIZATIONMODELID: 01KNBXW5EW2CPZ6G9PFTBJ1VVT
+      # OPENFGA_FGASHOULDIMPORTINITIALSTRUCTURE: true
+    ports:
+      - "${ENV_SPRING_APP_SERVER_PORT:-8090}:${ENV_SPRING_APP_SERVER_PORT:-8090}"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:${ENV_SPRING_APP_SERVER_PORT:-8090}/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    # volumes:
+    #   - ./logs:/opt/app/logs:rw # Mount the application logs directory to the host machine for easier access to logs
+    #   -
+    depends_on:
+      alnsclickhousetest-infra-postgresql:
+        condition: service_healthy
+      alnsclickhousetest-infra-openfga-server:
+        condition: service_healthy
+      alnsclickhousetest-infra-mailhog:
+        condition: service_started
+    networks:
+      alnsclickhousetest-network-dev1-01:
+        ipv4_address: 172.199.0.60

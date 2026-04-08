@@ -1,0 +1,40 @@
+services:
+
+  alnsclickhousetest-infra-openfga-model-importer:
+    image: openfga/cli:${ENV_OPENFGA_CLI_VERSION}
+    hostname: ${ENV_DEFAULT_DOCKERCNTR_NAME_PREFIX}-infra-openfga-model-importer
+    container_name: ${ENV_DEFAULT_DOCKERCNTR_NAME_PREFIX}-infra-openfga-model-importer
+    command: ${ENV_OPENFGA_IMPORTER_CLI_COMMAND}
+    restart: "no"
+    depends_on:
+      alnsclickhousetest-infra-openfga-server:
+        condition: service_healthy
+    volumes:
+      - ./openfga/pre-import:/tmp
+    networks:
+      alnsclickhousetest-network-dev1-01:
+        ipv4_address: 172.199.0.22
+
+#  keycloak-import:
+#    depends_on:
+#      openfga:
+#        condition: service_healthy
+#      keycloak:
+#        condition: service_healthy
+#      openfga-import:
+#        condition: service_completed_successfully
+#    image: quay.io/keycloak/keycloak:${KC_VERSION}
+#    container_name: keycloak-import
+#    restart: "no"
+#    entrypoint: [
+#      "sh",
+#      "-c",
+#      "echo 'Waiting 10 secs for importing Keycloak configuration...';sleep 10;/opt/keycloak/import.sh"
+#    ]
+#    environment:
+#      KEYCLOAK_URL: http://keycloak:8081
+#      KEYCLOAK_USER: admin
+#      KEYCLOAK_PASSWORD: password
+#    volumes:
+#      - $PWD/keycloak/import.sh:/opt/keycloak/import.sh
+

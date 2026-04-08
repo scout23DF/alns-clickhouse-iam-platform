@@ -1,0 +1,58 @@
+debug: false # Enable or disable debug mode
+
+logging:
+    level:
+        com:
+            clickhouse:
+                alnscodingexercise: DEBUG
+        org:
+            springframework:
+                security: INFO
+                web:
+                    filter:
+                        CommonsRequestLoggingFilter: INFO
+                    nodeValue: INFO
+
+    file:
+        # name: alns-clickhouse-app.log # The path to the application log file.
+        # path: /var/log/spring-app # The path to the application log file.
+        path: ./logs/alns-clickhouse-app.log # The path to the application log file.
+
+server:
+    port: 8090
+
+spring:
+    datasource: # Datasource configuration
+        url: jdbc:postgresql://alnsclickhousetest-infra-postgresql:5432/DBIAMPlatform
+        username: dbaiamplatform01
+        password: 1a88a1
+
+    jpa:
+        properties:
+            hibernate:
+                show_sql: true
+                format_sql: true
+    thymeleaf: # Thymeleaf configuration
+        cache: false # Enable or disable Thymeleaf cache
+        prefix: classpath:/templates/ # Prefix for Thymeleaf templates
+        suffix: .html # Suffix for Thymeleaf templates
+        mode: HTML
+    devtools:
+        livereload:
+            enabled: 'false' # Enable or disable livereload
+        restart:
+            enabled: 'false' # Enable or disable devtools restart
+
+    mail:
+        host: alnsclickhousetest-infra-mailhog
+        port: 1025
+
+    docker:
+        compose:
+            enabled: false
+
+openfga:
+    fga-api-url: http://alnsclickhousetest-infra-openfga-server:8080
+    # fga-store-id: 01KNBXTRD2Q49YDQE6W94018X8
+    # fga-authorization-model-id: 01KNBXW5EW2CPZ6G9PFTBJ1VVT
+    fga-should-import-initial-structure: true

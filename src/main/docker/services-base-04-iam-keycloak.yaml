@@ -1,0 +1,84 @@
+services:
+
+  alnsclickhousetest-infra-keycloak:
+    image: quay.io/keycloak/keycloak:${ENV_KC_MAIN0_VERSION:-latest}
+    hostname: ${ENV_DEFAULT_DOCKERCNTR_NAME_PREFIX}-infra-keycloak
+    container_name: ${ENV_DEFAULT_DOCKERCNTR_NAME_PREFIX}-infra-keycloak
+    user: "root:root"
+    labels:
+      org.springframework.boot.readiness-check.tcp.disable: true
+    environment:
+      KC_RUN_IN_CONTAINER: "true"
+      KC_DB: ${ENV_KC_MAIN0_DB}
+      KC_DB_URL_HOST: ${ENV_KC_MAIN0_DB_URL_HOST}
+      KC_DB_URL_PORT: ${ENV_KC_MAIN0_DB_URL_PORT}
+      KC_DB_URL_DATABASE: ${ENV_KC_MAIN0_DB_URL_DATABASE}
+      KC_DB_USERNAME: ${ENV_KC_MAIN0_DB_USERNAME}
+      KC_DB_PASSWORD: ${ENV_KC_MAIN0_DB_PASSWORD}
+      KC_DB_SCHEMA: ${ENV_KC_MAIN0_DB_SCHEMA}
+      # KEYCLOAK_ADMIN: admin
+      # KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${ENV_KC_MAIN0_ADMIN_USERNAME}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${ENV_KC_MAIN0_ADMIN_PASSWORD}
+      KC_DB_URL_PROPERTIES: ${ENV_KC_MAIN0_DB_URL_PROPERTIES}
+      KC_FEATURES: scripts
+      # KC_FEATURES: ${ENV_KC_MAIN0_FEATURES}
+      # KC_FEATURES_DISABLED: ${ENV_KC_MAIN0_FEATURES_DISABLED}
+
+      KC_HOSTNAME: "localhost"
+      KC_HOSTNAME_STRICT: "false"
+      KC_HOSTNAME_STRICT_HTTPS: "false"
+      KC_HTTP_ENABLED: "true"
+      KC_HEALTH_ENABLED: "true"
+      KC_METRICS_ENABLED: "true"
+      KC_HTTPS_CERTIFICATE_FILE: /opt/keycloak/ssl/certificate.pem
+      KC_HTTPS_CERTIFICATE_KEY_FILE: /opt/keycloak/ssl/key.pem
+
+      KC_HTTP_PORT: ${ENV_KC_MAIN0_HTTP_PORT}
+      KC_HTTPS_PORT: ${ENV_KC_MAIN0_HTTPS_PORT}
+
+      # KC_LOG_LEVEL: ${ENV_KC_MAIN0_LOG_LEVEL}
+      # DEBUG: ${ENV_KC_MAIN0_DEBUG}
+      # DEBUG_PORT: "*:${ENV_KC_MAIN0_DEBUG_PORT}"
+      # KC_CACHE: ${ENV_KC_MAIN0_CACHE}
+      # KC_CACHE_STACK: ${ENV_KC_MAIN0_CACHE_STACK}
+      # Management Settings:
+      # KC_HTTP_MANAGEMENT_PORT: 9110
+      # KC_HTTP_MANAGEMENT_RELATIVE_PATH: "/management"
+      # JAVA_TOOL_OPTIONS: ${ENV_KC_MAIN0_JAVA_TOOL_OPTIONS}
+      # JAVA_OPTS: ${ENV_KC_MAIN0_JAVA_OPTS}
+      # JAVA_OPTS_APPEND: ${ENV_KC_MAIN0_JAVA_OPTS_APPEND}
+    command:
+      - start
+      - --verbose
+      - --import-realm
+    # command: 'start-dev --import-realm --verbose'
+    ports:
+      - "9080:9080"
+      - "9443:9443"
+      - "9000:9000"
+    expose:
+      - "9080"
+      - "9443"
+      - "9000"
+    healthcheck:
+      # test:
+      #   [
+      #     'CMD-SHELL',
+      #     '[ -f /tmp/CustomKeycloakHealthCheck.java ] || echo "public class CustomKeycloakHealthCheck { public static void main(String[] args) throws java.lang.Throwable { System.exit(java.net.HttpURLConnection.HTTP_OK == ((java.net.HttpURLConnection)new java.net.URL(args[0]).openConnection()).getResponseCode() ? 0 : 1); } }" > /tmp/CustomKeycloakHealthCheck.java && java /tmp/CustomKeycloakHealthCheck.java http://localhost:9000/health/live',
+      #   ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      test: ['CMD-SHELL', '[ -f /tmp/CustomKeycloakHealthCheck.java ] || echo "public class CustomKeycloakHealthCheck { public static void main(String[] args) throws java.lang.Throwable { System.exit(java.net.HttpURLConnection.HTTP_OK == ((java.net.HttpURLConnection)new java.net.URL(args[0]).openConnection()).getResponseCode() ? 0 : 1); } }" > /tmp/CustomKeycloakHealthCheck.java && java /tmp/CustomKeycloakHealthCheck.java https://localhost:9000/health/live']
+    depends_on:
+      alnsclickhousetest-infra-postgresql:
+        condition: service_healthy
+      alnsclickhousetest-infra-openfga-server:
+        condition: service_healthy
+    volumes:
+      - ./keycloak/ssl:/opt/keycloak/ssl/
+      - ./keycloak/realms-import-config:/opt/keycloak/data/import
+    networks:
+      alnsclickhousetest-network-dev1-01:
+        ipv4_address: 172.199.0.30

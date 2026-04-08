@@ -1,0 +1,42 @@
+services:
+
+  alnsclickhousetest-infra-openfga-migrator:
+    image: openfga/openfga:${ENV_OPENFGA_SERVER_VERSION}
+    hostname: ${ENV_DEFAULT_DOCKERCNTR_NAME_PREFIX}-infra-openfga-migrator
+    container_name: ${ENV_DEFAULT_DOCKERCNTR_NAME_PREFIX}-infra-openfga-migrator
+    environment:
+      - OPENFGA_DATASTORE_ENGINE=${ENV_OPENFGA_DATASTORE_ENGINE}
+      - OPENFGA_DATASTORE_URI=${ENV_OPENFGA_DATASTORE_URI}
+    command: migrate
+    depends_on:
+      alnsclickhousetest-infra-postgresql:
+        condition: service_healthy
+    networks:
+      alnsclickhousetest-network-dev1-01:
+        ipv4_address: 172.199.0.20
+
+  alnsclickhousetest-infra-openfga-server:
+    image: openfga/openfga:${ENV_OPENFGA_SERVER_VERSION}
+    hostname: ${ENV_DEFAULT_DOCKERCNTR_NAME_PREFIX}-infra-openfga-server
+    container_name: ${ENV_DEFAULT_DOCKERCNTR_NAME_PREFIX}-infra-openfga-server
+    environment:
+      - OPENFGA_DATASTORE_ENGINE=${ENV_OPENFGA_DATASTORE_ENGINE}
+      - OPENFGA_DATASTORE_URI=${ENV_OPENFGA_DATASTORE_URI}
+      - OPENFGA_DATASTORE_MAX_OPEN_CONNS=100
+      - OPENFGA_LOG_LEVEL=${ENV_OPENFGA_LOG_LEVEL}
+    ports:
+      - "8080:8080" #http
+      - "3000:3000" #playground
+    command: run
+    depends_on:
+      alnsclickhousetest-infra-openfga-migrator:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "/usr/local/bin/grpc_health_probe", "-addr=alnsclickhousetest-infra-openfga-server:8081"]
+      interval: 3s
+      timeout: 30s
+      retries: 3
+    networks:
+      alnsclickhousetest-network-dev1-01:
+        ipv4_address: 172.199.0.21
+

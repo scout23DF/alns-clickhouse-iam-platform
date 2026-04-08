@@ -1,0 +1,9 @@
+{
+  "writes": [
+    {
+      "user": "user:spiderman",
+      "relation": "editor",
+      "object": "document:doc-0001"
+    }
+  ]
+}

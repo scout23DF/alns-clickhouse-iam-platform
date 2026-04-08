@@ -1,0 +1,22 @@
+model
+  schema 1.1
+
+type user
+
+type group
+  relations
+    define member: [user, group#member]
+
+type document
+  relations
+    # roles
+    define owner: [user, group#member]
+    define editor: [user, group#member]
+    define viewer: [user, group#member]
+
+    # permissions
+    define can_change_owner: owner
+    define can_delete: owner
+    define can_share: owner or editor
+    define can_write: owner or editor
+    define can_read: owner or editor or viewer

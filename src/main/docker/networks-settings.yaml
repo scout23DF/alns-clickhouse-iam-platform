@@ -1,0 +1,7 @@
+# Networks configurations
+networks:
+  alnsclickhousetest-network-dev1-01:
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.199.0.0/16

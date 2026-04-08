@@ -1,0 +1,191 @@
+debug: true # Enable or disable debug mode
+
+logging:
+    level:
+        com:
+            clickhouse:
+                alnscodingexercise: DEBUG
+        org:
+            springframework:
+                security: DEBUG
+                web:
+                    filter:
+                        CommonsRequestLoggingFilter: DEBUG
+                    nodeValue: DEBUG
+    file:
+        # name: ./logs/alns-clickhouse-app.log # The path to the application log file.
+        path: ./logs/alns-clickhouse-app.log # The path to the application log file.
+    pattern:
+        level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"
+
+server:
+    port: 8090
+    servlet:
+        session:
+            cookie:
+                secure: false # disabling secure cookie for local development
+                # secure: true # Whether the cookie should be flagged as secure or not.  If true, the cookie will only be sent over HTTPS.
+                http-only: true # Whether the cookie should be flagged as HTTP only or not.  If true, the cookie will not be accessible to client side scripts.
+            timeout: 30m # Session timeout in minutes
+
+spring:
+    application:
+        name: AlnsClickHouseIAMPlatformApplication
+    main:
+        allow-bean-definition-overriding: true
+
+    datasource: # Datasource configuration
+        driver-class-name: org.postgresql.Driver
+        hikari:
+            auto-commit: false
+            poolName: Hikari
+        type: com.zaxxer.hikari.HikariDataSource
+        url: jdbc:postgresql://localhost:5432/DBIAMPlatform
+        username: dbaiamplatform01
+        password: 1a88a1
+
+    jpa:
+        hibernate:
+            # ddl-auto: none
+            ddl-auto: update
+            naming:
+                physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
+        open-in-view: true
+        properties:
+            hibernate:
+                connection:
+                    provider_disables_autocommit: true
+                generate_statistics: false
+                jdbc:
+                    batch_size: 25
+                    time_zone: UTC
+                order_inserts: true
+                order_updates: true
+                query:
+                    fail_on_pagination_over_collection_fetch: true
+                    in_clause_parameter_padding: true
+                show_sql: true
+                format_sql: true
+                dialect: org.hibernate.dialect.PostgreSQLDialect
+    data:
+        jpa:
+            repositories:
+                bootstrap-mode: deferred
+    thymeleaf: # Thymeleaf configuration
+        cache: false # Enable or disable Thymeleaf cache
+        prefix: file:src/main/resources/templates/ # Prefix for Thymeleaf templates
+        suffix: .html # Suffix for Thymeleaf templates
+        mode: HTML
+    mvc:
+        log-request-details: 'true' # Enable or disable request details logging
+    web: # Web configuration
+        resources:
+            static-locations: file:src/main/resources/static/, classpath:/static/
+            cache:
+                period: 0
+    messages:
+        basename: i8n/messages # Message basename
+        encoding: UTF-8
+    jackson:
+        default-property-inclusion: non_absent
+    devtools:
+        livereload:
+            enabled: 'true' # Enable or disable livereload
+            https: 'true' # Enable or disable HTTPS for livereload
+        restart:
+            enabled: 'true' # Enable or disable devtools restart
+            poll-interval: '2s' # Poll interval for devtools restart
+            quiet-period: '1s' # Quiet period for devtools restart
+            additional-paths:
+                - src/main/java/ # Additional paths for devtools restart
+
+    mail:
+        host: localhost
+        port: 1025
+        username: dummy
+        password: dummy
+        properties:
+            mail.smtp.auth: false
+            mail.smtp.starttls.enable: false
+
+    security:
+        oauth2:
+            enabled: false # Enable or disable OAuth2
+
+    docker:
+        compose:
+            enabled: true
+            file: ./docker-compose-infra.yml
+            readiness:
+                tcp:
+                    connect-timeout: 60000ms
+                    read-timeout: 60000ms
+                wait: never
+                timeout: 60s
+            # lifecycle-management: start-and-stop
+            lifecycle-management: start_only
+            start:
+                log-level: debug
+                skip: if_running
+
+management:
+    endpoint:
+        health:
+            probes:
+                enabled: true
+            show-details: always
+    endpoints:
+        web:
+            base-path: /management
+            exposure:
+                include:
+                    - configprops
+                    - env
+                    - health
+                    - info
+                    - logfile
+                    - loggers
+                    - threaddump
+
+# hibernate:
+#     globally_quoted_identifiers: "false" # Hibernate Globally quoted identifiers
+
+springdoc:
+    swagger-ui:
+        path: /swagger-ui.html
+        operationsSorter: alpha
+        tagsSorter: alpha
+        tryItOutEnabled: true
+        # oauth:
+        #     client-id: swaggerui-test-app
+        #     realm: clickhouse-apps-01
+    # oauth2:
+    #     authorization-url: http://localhost:9080/realms/clickhouse-apps-01/protocol/openid-connect/auth
+    api-docs:
+        path: /v3/api-docs
+    packages-to-scan: com.clickhouse.alnscodingexercise
+    show-actuator: true
+
+
+support:
+    email: no-reply@iam-platform.clickhouse.dev.local # Support email address for the application
+
+#    5am every day
+purge:
+    cron:
+        expression: "0 0 5 * * ?" # The cron expression for the purge job.  This defaults to 5 am every day.
+
+openfga:
+    fga-api-url: http://localhost:8080
+    # fga-store-id: 01KNBXTRD2Q49YDQE6W94018X8
+    fga-store-name: clickhouse-iam-fga-store
+    # fga-authorization-model-id: 01KNBXW5EW2CPZ6G9PFTBJ1VVT
+    fga-should-import-initial-structure: true
+    fga-initial-model-schema-to-import: classpath:openfga/initial-model-tuples-data/domain-assetmgmt-resourcething-model-schema.json
+    fga-initial-relationship-tuples-to-import:
+        - classpath:openfga/initial-model-tuples-data/domain-assetmgmt-resourcething-tuples-example-data.json
+    # fga-api-token-issuer:
+    # fga-api-audience:
+    # fga-client-id:
+    # fga-client-secret:
+
