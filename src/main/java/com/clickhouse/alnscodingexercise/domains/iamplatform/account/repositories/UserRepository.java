@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface UserRepository extends JpaRepository<CHUserAccount, Long> {
 
     CHUserAccount findByEmail(String email);
-    CHUserAccount findByUsername(String searchUsernameOrEmail);
+    CHUserAccount findByUsername(String searchUsername);
     void delete(@NonNull CHUserAccount chUserAccount);
 
 }

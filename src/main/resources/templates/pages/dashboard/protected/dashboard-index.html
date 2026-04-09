@@ -16,11 +16,11 @@
 </nav>
 
     <div class="container">
-	    <div sec:authorize="hasAuthority('WRITE_PRIVILEGE')" th:utext="#{label.pages.chUserAccount.message}">User</div>
+	    <div sec:authorize="hasAuthority('WRITE_PRIVILEGE')" th:utext="#{label.pages.user.message}">User</div>
 	
 	    <div sec:authorize="hasAuthority('WRITE_PRIVILEGE')" th:utext="#{label.pages.admin.message}"></div>
 	     
-	    <p th:if="${param.user} != null" th:text="${param.user[0]}">User</p>
+	    <p th:if="${authenticatedUser.username} != null" th:text="${authenticatedUser.username}">User</p>
 	     
 	    <a class="btn btn-default" th:href="@{/pages/dashboard/protected/admin/admin.html}" th:utext="#{label.pages.admin}">admin</a>
 		<br /> <br />

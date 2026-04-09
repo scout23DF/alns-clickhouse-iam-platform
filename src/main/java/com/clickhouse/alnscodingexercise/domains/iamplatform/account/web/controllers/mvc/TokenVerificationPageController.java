@@ -35,7 +35,7 @@ public class TokenVerificationPageController {
     public String resendRegistrationToken(final HttpServletRequest request, final Model model, @RequestParam("token") final String existingToken) {
         final Locale locale = request.getLocale();
         final VerificationToken newToken = userAccountMgmtService.generateNewVerificationToken(existingToken);
-        final CHUserAccount CHUserAccount = userAccountMgmtService.getUser(newToken.getToken());
+        final CHUserAccount CHUserAccount = userAccountMgmtService.getUserByVerificationToken(newToken.getToken());
         try {
             this.notificationService.resendVerificationTokenEmailForRegistration(
                     RequestUtils.getAppUrl(request),

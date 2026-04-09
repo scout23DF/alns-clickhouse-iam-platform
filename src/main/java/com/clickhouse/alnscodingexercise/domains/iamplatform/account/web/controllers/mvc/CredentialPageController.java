@@ -44,7 +44,7 @@ public class CredentialPageController {
 
     @PostMapping("/" + AppConstants.DEFAULT_PAGES_IAM_ACCOUNT_PREFIX_PATH + "/resetPassword")
     public String resetPassword(final HttpServletRequest request, final Model model, @RequestParam("email") final String userEmail) {
-        final CHUserAccount CHUserAccount = userAccountMgmtService.findUserByEmail(userEmail);
+        final CHUserAccount CHUserAccount = userAccountMgmtService.getUserByEmail(userEmail);
         if (CHUserAccount == null) {
             model.addAttribute("message", messages.getMessage("message.userNotFound", null, request.getLocale()));
             return "redirect:/" + AppConstants.DEFAULT_PAGES_IAM_AUTHN_PREFIX_PATH + "/login-form.html?lang=" + request.getLocale().getLanguage();

@@ -3,8 +3,8 @@ package com.clickhouse.alnscodingexercise.domains.iamplatform.account.services;
 import com.clickhouse.alnscodingexercise.domains.iamplatform.account.models.entities.CHUserAccount;
 import com.clickhouse.alnscodingexercise.domains.iamplatform.account.models.entities.PasswordResetToken;
 import com.clickhouse.alnscodingexercise.domains.iamplatform.account.models.entities.VerificationToken;
-import com.clickhouse.alnscodingexercise.domains.iamplatform.account.web.requests.PasswordRequestDTO;
 import com.clickhouse.alnscodingexercise.domains.iamplatform.account.web.requests.CreateUserAccountRequestDTO;
+import com.clickhouse.alnscodingexercise.domains.iamplatform.account.web.requests.PasswordRequestDTO;
 
 import java.util.List;
 import java.util.Locale;
@@ -14,7 +14,13 @@ public interface IUserAccountMgmtService {
 
     CHUserAccount registerNewUserAccount(CreateUserAccountRequestDTO accountDto, Locale locale, String appURL);
 
-    CHUserAccount getUser(String verificationToken);
+    Optional<CHUserAccount> getUserById(long id);
+
+    CHUserAccount getUserByEmail(String email);
+
+    CHUserAccount getUserByUsername(String searchUsername);
+
+    CHUserAccount getUserByVerificationToken(String verificationToken);
 
     void saveRegisteredUser(CHUserAccount CHUserAccount);
 
@@ -28,15 +34,11 @@ public interface IUserAccountMgmtService {
 
     void createPasswordResetTokenForUser(CHUserAccount CHUserAccount, String token);
 
-    CHUserAccount findUserByEmail(String email);
-
     PasswordResetToken getPasswordResetToken(String token);
 
     Optional<CHUserAccount> getUserByPasswordResetToken(String token);
 
     String validatePasswordResetToken(String token);
-
-    Optional<CHUserAccount> getUserByID(long id);
 
     void changeUserPassword(CHUserAccount CHUserAccount, PasswordRequestDTO passwordRequestDTO);
 

@@ -84,7 +84,8 @@ public class SecurityConfig {
                     .anonymous()
                     .requestMatchers("/" + AppConstants.DEFAULT_PAGES_IAM_ACCOUNT_PREFIX_PATH + "/updatePassword*")
                     .hasAuthority("CHANGE_PASSWORD_PRIVILEGE")
-                    .requestMatchers("/" + AppConstants.DEFAULT_PAGES_DASHBOARD_PREFIX_PATH + "/console")
+                    .requestMatchers("/" + AppConstants.DEFAULT_PAGES_DASHBOARD_PREFIX_PATH + "/console",
+                                     "/" + AppConstants.DEFAULT_PAGES_DASHBOARD_PREFIX_PATH + "/handlePortalHome")
                     .hasAuthority("READ_PRIVILEGE")
                     .anyRequest()
                     .hasAuthority("READ_PRIVILEGE");

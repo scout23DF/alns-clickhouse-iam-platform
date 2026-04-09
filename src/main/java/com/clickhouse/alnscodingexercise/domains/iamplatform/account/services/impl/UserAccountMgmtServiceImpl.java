@@ -69,7 +69,7 @@ public class UserAccountMgmtServiceImpl implements IUserAccountMgmtService {
     }
 
     @Override
-    public CHUserAccount getUser(final String verificationToken) {
+    public CHUserAccount getUserByVerificationToken(final String verificationToken) {
         final VerificationToken token = tokenRepository.findByToken(verificationToken);
         if (token != null) {
             return token.getUser();
@@ -141,8 +141,13 @@ public class UserAccountMgmtServiceImpl implements IUserAccountMgmtService {
     }
 
     @Override
-    public CHUserAccount findUserByEmail(final String email) {
+    public CHUserAccount getUserByEmail(final String email) {
         return userRepository.findByEmail(email);
+    }
+
+    @Override
+    public CHUserAccount getUserByUsername(String searchUsername) {
+        return userRepository.findByUsername(searchUsername);
     }
 
     @Override
@@ -156,7 +161,7 @@ public class UserAccountMgmtServiceImpl implements IUserAccountMgmtService {
     }
 
     @Override
-    public Optional<CHUserAccount> getUserByID(final long id) {
+    public Optional<CHUserAccount> getUserById(final long id) {
         return userRepository.findById(id);
     }
 

@@ -56,7 +56,7 @@ public class AccountMgmtRestController {
 
     @PostMapping(AppConstants.DEFAULT_API_IAM_ACCOUNT_PREFIX_PATH + "/resetPassword")
     public GenericErrorResponseDTO resetPasswordRest(HttpServletRequest request, @RequestParam("email") String userEmail) {
-        final CHUserAccount CHUserAccount = userAccountMgmtService.findUserByEmail(userEmail);
+        final CHUserAccount CHUserAccount = userAccountMgmtService.getUserByEmail(userEmail);
         if (CHUserAccount != null) {
             String token = UUID.randomUUID().toString();
             userAccountMgmtService.createPasswordResetTokenForUser(CHUserAccount, token);
@@ -94,7 +94,7 @@ public class AccountMgmtRestController {
     // Change user password
     @PostMapping(AppConstants.DEFAULT_API_IAM_ACCOUNT_PREFIX_PATH + "/updatePassword")
     public GenericErrorResponseDTO updatePasswordRest(Locale locale, @Valid PasswordRequestDTO passwordRequestDTO) {
-        final CHUserAccount CHUserAccount = userAccountMgmtService.findUserByEmail(((CHUserAccount) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getEmail());
+        final CHUserAccount CHUserAccount = userAccountMgmtService.getUserByEmail(((CHUserAccount) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getEmail());
         if (!userAccountMgmtService.checkIfValidOldPassword(CHUserAccount, passwordRequestDTO.getOldPassword())) {
             throw new InvalidOldPasswordException();
         }
@@ -105,7 +105,7 @@ public class AccountMgmtRestController {
     @GetMapping(AppConstants.DEFAULT_API_IAM_ACCOUNT_PREFIX_PATH + "/resendRegistrationToken")
     public GenericErrorResponseDTO resendRegistrationTokenRest(HttpServletRequest request, @RequestParam("token") String existingToken) {
         VerificationToken newToken = userAccountMgmtService.generateNewVerificationToken(existingToken);
-        CHUserAccount CHUserAccount = userAccountMgmtService.getUser(newToken.getToken());
+        CHUserAccount CHUserAccount = userAccountMgmtService.getUserByVerificationToken(newToken.getToken());
 
         this.notificationService.resendVerificationTokenEmailForRegistration(
                 RequestUtils.getAppUrl(request),

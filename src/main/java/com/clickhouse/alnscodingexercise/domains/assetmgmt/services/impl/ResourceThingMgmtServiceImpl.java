@@ -6,6 +6,7 @@ import com.clickhouse.alnscodingexercise.domains.assetmgmt.repositories.Resource
 import com.clickhouse.alnscodingexercise.domains.assetmgmt.services.IResourceThingMgmtService;
 import com.clickhouse.alnscodingexercise.domains.assetmgmt.services.mappers.ResourceThingMapper;
 import com.clickhouse.alnscodingexercise.domains.assetmgmt.web.requests.CommandResourceThingDTO;
+import com.clickhouse.alnscodingexercise.domains.iamplatform.account.models.entities.CHUserAccount;
 import com.clickhouse.alnscodingexercise.domains.iamplatform.account.repositories.UserRepository;
 import com.clickhouse.alnscodingexercise.domains.iamplatform.authz.models.dtos.GenericObjectEnrichedWithACLDTO;
 import com.clickhouse.alnscodingexercise.domains.iamplatform.authz.models.dtos.ProtectedObjectAclDTO;
@@ -17,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -73,7 +75,18 @@ public class ResourceThingMgmtServiceImpl implements IResourceThingMgmtService {
 
     @Override
     public List<ResourceThingDTO> searchByContainingText(String searchText, String propertyToSearchUpon) {
-        return List.of();
+
+        return switch (propertyToSearchUpon) {
+            case "id" -> resourceThingRepository.findById(searchText).stream()
+                    .map(resourceThingMapper::entityToDTO)
+                    .toList();
+            case "title" -> resourceThingRepository.findByTitleLikeIgnoreCase(searchText).stream()
+                    .map(resourceThingMapper::entityToDTO)
+                    .toList();
+            default -> resourceThingRepository.findAll().stream()
+                    .map(resourceThingMapper::entityToDTO)
+                    .toList();
+        };
     }
 
     @Override
@@ -83,8 +96,30 @@ public class ResourceThingMgmtServiceImpl implements IResourceThingMgmtService {
 
     @Override
     public List<GenericObjectEnrichedWithACLDTO<ResourceThingDTO>> searchByContainingTextWithACL(String searchText,
-                                                                                                 String propertyToSearchUpon) {
-        return List.of();
+                                                                                                 String propertyToSearchUpon,
+                                                                                                 List<String> usersIdsToFilterList) {
+
+        List<ResourceThingDTO> foundResourcesThingsList = searchByContainingText(searchText, propertyToSearchUpon);
+
+        if (CollectionUtils.isEmpty(foundResourcesThingsList)) {
+            return List.of();
+        } else {
+            return authorizationUtils.buildEnrichedObjectsWithACLFrom(
+                    foundResourcesThingsList,
+                    usersIdsToFilterList
+            );
+        }
+    }
+
+    @Override
+    public List<GenericObjectEnrichedWithACLDTO<ResourceThingDTO>> listAllWithAclForUser(
+            CHUserAccount authenticatedUser
+    ) {
+        return searchByContainingTextWithACL(
+                "ALL",
+                "ALL",
+                List.of(authenticatedUser.getUsername())
+        );
     }
 
     private ResourceThingDTO doCreateOrUpdateResourceThing(CommandResourceThingDTO commandResourceThing,

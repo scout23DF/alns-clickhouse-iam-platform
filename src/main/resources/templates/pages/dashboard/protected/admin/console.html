@@ -19,7 +19,7 @@
 	
     <h1>This is the landing page for the admin</h1>
     
-    <div sec:authorize="hasAuthority('READ_PRIVILEGE')">This text is only visible to a chUserAccount</div>
+    <div sec:authorize="hasAuthority('READ_PRIVILEGE')">This text is only visible to a User</div>
           
     <div sec:authorize="hasAuthority('WRITE_PRIVILEGE')"> This text is only visible to an admin</div>
     

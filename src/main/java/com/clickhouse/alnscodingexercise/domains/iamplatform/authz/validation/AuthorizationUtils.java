@@ -135,17 +135,6 @@ public class AuthorizationUtils {
                                                         .subjectType(oneProtectedObjectAcl.subjectType())
                                                         .subjectId(oneProtectedObjectAcl.subjectId())
                                                         .build()
-                                                /*
-                                                AllowedActionsDTO.builder()
-                                                        .objectType(oneProtectedObjectAcl.subjectType())
-                                                        .objectId(oneProtectedObjectAcl.subjectId())
-                                                        .canChangeOwner(hasPermissionFor(FgaRelationEnum.CAN_CHANGE_OWNER, resourceThingDTO, oneProtectedObjectAcl))
-                                                        .canWrite(hasPermissionFor(FgaRelationEnum.CAN_WRITE, resourceThingDTO, oneProtectedObjectAcl))
-                                                        .canRead(hasPermissionFor(FgaRelationEnum.CAN_READ, resourceThingDTO, oneProtectedObjectAcl))
-                                                        .canShare(hasPermissionFor(FgaRelationEnum.CAN_SHARE, resourceThingDTO, oneProtectedObjectAcl))
-                                                        .canDelete(hasPermissionFor(FgaRelationEnum.CAN_DELETE, resourceThingDTO, oneProtectedObjectAcl))
-                                                        .build()
-                                                */
                                         )
                                 ).build()
                 );
@@ -226,19 +215,48 @@ public class AuthorizationUtils {
 
     public List<GenericObjectEnrichedWithACLDTO<ResourceThingDTO>> buildEnrichedObjectsWithACLFrom(
             List<ResourceThingDTO> newResourcesThingsList,
-            List<String> usernamesList
+            List<String> usersIdsToFilterList
     ) {
 
         return newResourcesThingsList.stream()
                 .map(resourceThingDTO -> GenericObjectEnrichedWithACLDTO.<ResourceThingDTO>builder()
                         .itemProtected(resourceThingDTO)
-                        .protectedObjectsAclsList( this.buildAccessControlListFor(resourceThingDTO, usernamesList) )
+                        .protectedObjectsAclsList( this.buildAccessControlListFor(resourceThingDTO, usersIdsToFilterList) )
                         .build())
                 .toList();
     }
 
-    public List<ProtectedObjectAclDTO> buildAccessControlListFor(ResourceThingDTO resourceThingDTO, List<String> usernamesList) {
-        return null;
+    public List<ProtectedObjectAclDTO> buildAccessControlListFor(ResourceThingDTO resourceThingDTO,
+                                                                 List<String> usersIdsToFilterList) {
+
+        List<ProtectedObjectAclDTO> protectedObjectAclDTOList = new ArrayList<>();
+
+        if (!CollectionUtils.isEmpty(usersIdsToFilterList)) {
+
+            usersIdsToFilterList.forEach(userId -> {
+                protectedObjectAclDTOList.add(
+                        ProtectedObjectAclDTO.builder()
+                                .referenceObjectType(FgaObjectTypeEnum.DOCUMENT.toString())
+                                .resourceId(resourceThingDTO.id())
+                                .subjectType(FgaObjectTypeEnum.USER.toString())
+                                .subjectId(userId)
+                                .allowedActions(
+                                        authorizationService.getAllowedActionsOnObjectForUser(
+                                                PermissionSummaryDTO.builder()
+                                                        .resourceType(FgaObjectTypeEnum.DOCUMENT.toString())
+                                                        .resourceId(resourceThingDTO.id())
+                                                        .subjectType(FgaObjectTypeEnum.USER.toString())
+                                                        .subjectId(userId)
+                                                        .build()
+                                                )
+                                )
+                                .build()
+                );
+            });
+
+        }
+
+        return protectedObjectAclDTOList;
     }
 
 }

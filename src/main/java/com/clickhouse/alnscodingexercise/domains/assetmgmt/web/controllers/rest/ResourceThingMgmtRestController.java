@@ -101,12 +101,14 @@ public class ResourceThingMgmtRestController {
     @GetMapping("/search-by-containing-text-with-acl")
     public GenericOperationResponseDTO<List<GenericObjectEnrichedWithACLDTO<ResourceThingDTO>>> searchByContainingTextWithACL(
             @RequestParam String propertyNameToSearch,
-            @RequestParam String propertyValueToSearch
+            @RequestParam String propertyValueToSearch,
+            @RequestParam List<String> usersIdsToFilterList
     ) {
 
         List<GenericObjectEnrichedWithACLDTO<ResourceThingDTO>> foundResourceThingsList = resourceThingMgmtService.searchByContainingTextWithACL(
                 propertyValueToSearch,
-                propertyNameToSearch
+                propertyNameToSearch,
+                usersIdsToFilterList
         );
 
         return GenericOperationResponseDTO.<List<GenericObjectEnrichedWithACLDTO<ResourceThingDTO>>>builder()

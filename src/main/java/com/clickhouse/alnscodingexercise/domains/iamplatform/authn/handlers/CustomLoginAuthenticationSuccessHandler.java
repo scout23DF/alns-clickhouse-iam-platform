@@ -98,7 +98,8 @@ public class CustomLoginAuthenticationSuccessHandler implements AuthenticationSu
                 username = authentication.getName();
             }
 
-            return "/" + AppConstants.DEFAULT_PAGES_DASHBOARD_PREFIX_PATH + "/protected/dashboard-index.html?user=" + username;
+            // return "/" + AppConstants.DEFAULT_PAGES_DASHBOARD_PREFIX_PATH + "/protected/dashboard-index.html?user=" + username;
+            return "/" + AppConstants.DEFAULT_PAGES_DASHBOARD_PREFIX_PATH + "/handlePortalHome";
         } else if (isAdmin) {
             return "/" + AppConstants.DEFAULT_PAGES_DASHBOARD_PREFIX_PATH + "/console";
         } else {

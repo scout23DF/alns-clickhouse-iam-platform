@@ -2,6 +2,7 @@ package com.clickhouse.alnscodingexercise.domains.assetmgmt.services;
 
 import com.clickhouse.alnscodingexercise.domains.assetmgmt.models.dtos.ResourceThingDTO;
 import com.clickhouse.alnscodingexercise.domains.assetmgmt.web.requests.CommandResourceThingDTO;
+import com.clickhouse.alnscodingexercise.domains.iamplatform.account.models.entities.CHUserAccount;
 import com.clickhouse.alnscodingexercise.domains.iamplatform.authz.models.dtos.GenericObjectEnrichedWithACLDTO;
 import com.clickhouse.alnscodingexercise.domains.shared.models.enums.GenericOperationResultEnum;
 
@@ -15,6 +16,11 @@ public interface IResourceThingMgmtService {
     List<ResourceThingDTO> searchByContainingText(String searchText, String propertyToSearchUpon);
     List<GenericOperationResultEnum> removeResourceThingsByIds(List<String> idsToRemove);
 
-    List<GenericObjectEnrichedWithACLDTO<ResourceThingDTO>> searchByContainingTextWithACL(String searchText, String propertyToSearchUpon);
+    List<GenericObjectEnrichedWithACLDTO<ResourceThingDTO>> searchByContainingTextWithACL(
+            String searchText,
+            String propertyToSearchUpon,
+            List<String> usersIdsToFilterList
+    );
 
+    List<GenericObjectEnrichedWithACLDTO<ResourceThingDTO>> listAllWithAclForUser(CHUserAccount authenticatedUser);
 }
