@@ -1,0 +1,315 @@
+[
+    {
+        "id": "doc-1001",
+        "title": "Document-#1001",
+        "metadata": "Metadata Ninja - doc-1001",
+        "summaryContent": "Short Content - doc-1001",
+        "fullContent": "Long full Content - doc-1001",
+        "creatorUsername": "spiderman",
+        "shouldIgnoreAclContent": false,
+        "assignableGrantsRequestsList": [
+            {
+                "referenceObjectType": "document",
+                "resourceId": "doc-1001",
+                "subjectType": "user",
+                "subjectId": "spiderman",
+                "rolesNamesRelationsList": [
+                    "owner"
+                ]
+            }
+        ,
+            {
+                "referenceObjectType": "document",
+                "resourceId": "doc-1001",
+                "subjectType": "user",
+                "subjectId": "ironman",
+                "rolesNamesRelationsList": [
+                    "editor"
+                ]
+            }
+        ,
+            {
+                "referenceObjectType": "document",
+                "resourceId": "doc-1001",
+                "subjectType": "user",
+                "subjectId": "black-widow",
+                "rolesNamesRelationsList": [
+                    "viewer"
+                ]
+            }
+        ,
+            {
+                "referenceObjectType": "document",
+                "resourceId": "doc-1001",
+                "subjectType": "user",
+                "subjectId": "chapolin",
+                "rolesNamesRelationsList": [
+                    "editor"
+                ]
+            }
+
+        ]
+    }
+,
+    {
+        "id": "doc-1002",
+        "title": "Document-#1002",
+        "metadata": "Metadata Ninja - doc-1002",
+        "summaryContent": "Short Content - doc-1002",
+        "fullContent": "Long full Content - doc-1002",
+        "creatorUsername": "ironman",
+        "shouldIgnoreAclContent": false,
+        "assignableGrantsRequestsList": [
+            {
+                "referenceObjectType": "document",
+                "resourceId": "doc-1002",
+                "subjectType": "user",
+                "subjectId": "ironman",
+                "rolesNamesRelationsList": [
+                    "owner"
+                ]
+            }
+        ,
+            {
+                "referenceObjectType": "document",
+                "resourceId": "doc-1002",
+                "subjectType": "user",
+                "subjectId": "black-widow",
+                "rolesNamesRelationsList": [
+                    "editor"
+                ]
+            }
+        ,
+            {
+                "referenceObjectType": "document",
+                "resourceId": "doc-1002",
+                "subjectType": "user",
+                "subjectId": "spiderman",
+                "rolesNamesRelationsList": [
+                    "viewer"
+                ]
+            }
+        ,
+            {
+                "referenceObjectType": "document",
+                "resourceId": "doc-1002",
+                "subjectType": "user",
+                "subjectId": "chapolin",
+                "rolesNamesRelationsList": [
+                    "editor"
+                ]
+            }
+
+        ]
+    }
+,
+    {
+        "id": "doc-1003",
+        "title": "Document-#1003",
+        "metadata": "Metadata Ninja - doc-1003",
+        "summaryContent": "Short Content - doc-1003",
+        "fullContent": "Long full Content - doc-1003",
+        "creatorUsername": "black-widow",
+        "shouldIgnoreAclContent": false,
+        "assignableGrantsRequestsList": [
+            {
+                "referenceObjectType": "document",
+                "resourceId": "doc-1003",
+                "subjectType": "user",
+                "subjectId": "black-widow",
+                "rolesNamesRelationsList": [
+                    "owner"
+                ]
+            }
+        ,
+            {
+                "referenceObjectType": "document",
+                "resourceId": "doc-1003",
+                "subjectType": "user",
+                "subjectId": "spiderman",
+                "rolesNamesRelationsList": [
+                    "editor"
+                ]
+            }
+        ,
+            {
+                "referenceObjectType": "document",
+                "resourceId": "doc-1003",
+                "subjectType": "user",
+                "subjectId": "ironman",
+                "rolesNamesRelationsList": [
+                    "viewer"
+                ]
+            }
+        ,
+            {
+                "referenceObjectType": "document",
+                "resourceId": "doc-1003",
+                "subjectType": "user",
+                "subjectId": "chapolin",
+                "rolesNamesRelationsList": [
+                    "editor"
+                ]
+            }
+
+        ]
+    }
+,
+    {
+        "id": "doc-1004",
+        "title": "Document-#1004",
+        "metadata": "Metadata Ninja - doc-1004",
+        "summaryContent": "Short Content - doc-1004",
+        "fullContent": "Long full Content - doc-1004",
+        "creatorUsername": "spiderman",
+        "shouldIgnoreAclContent": false,
+        "assignableGrantsRequestsList": [
+            {
+                "referenceObjectType": "document",
+                "resourceId": "doc-1004",
+                "subjectType": "user",
+                "subjectId": "spiderman",
+                "rolesNamesRelationsList": [
+                    "owner"
+                ]
+            }
+        ,
+            {
+                "referenceObjectType": "document",
+                "resourceId": "doc-1004",
+                "subjectType": "user",
+                "subjectId": "black-widow",
+                "rolesNamesRelationsList": [
+                    "editor"
+                ]
+            }
+        ,
+            {
+                "referenceObjectType": "document",
+                "resourceId": "doc-1004",
+                "subjectType": "user",
+                "subjectId": "ironman",
+                "rolesNamesRelationsList": [
+                    "viewer"
+                ]
+            }
+        ,
+            {
+                "referenceObjectType": "document",
+                "resourceId": "doc-1004",
+                "subjectType": "user",
+                "subjectId": "chapolin",
+                "rolesNamesRelationsList": [
+                    "editor"
+                ]
+            }
+
+        ]
+    }
+,
+    {
+        "id": "doc-1005",
+        "title": "Document-#1005",
+        "metadata": "Metadata Ninja - doc-1005",
+        "summaryContent": "Short Content - doc-1005",
+        "fullContent": "Long full Content - doc-1005",
+        "creatorUsername": "ironman",
+        "shouldIgnoreAclContent": false,
+        "assignableGrantsRequestsList": [
+            {
+                "referenceObjectType": "document",
+                "resourceId": "doc-1005",
+                "subjectType": "user",
+                "subjectId": "ironman",
+                "rolesNamesRelationsList": [
+                    "owner"
+                ]
+            }
+        ,
+            {
+                "referenceObjectType": "document",
+                "resourceId": "doc-1005",
+                "subjectType": "user",
+                "subjectId": "spiderman",
+                "rolesNamesRelationsList": [
+                    "editor"
+                ]
+            }
+        ,
+            {
+                "referenceObjectType": "document",
+                "resourceId": "doc-1005",
+                "subjectType": "user",
+                "subjectId": "black-widow",
+                "rolesNamesRelationsList": [
+                    "viewer"
+                ]
+            }
+        ,
+            {
+                "referenceObjectType": "document",
+                "resourceId": "doc-1005",
+                "subjectType": "user",
+                "subjectId": "chapolin",
+                "rolesNamesRelationsList": [
+                    "editor"
+                ]
+            }
+
+
+        ]
+    }
+,
+    {
+        "id": "doc-1006",
+        "title": "Document-#1006",
+        "metadata": "Metadata Ninja - doc-1006",
+        "summaryContent": "Short Content - doc-1006",
+        "fullContent": "Long full Content - doc-1006",
+        "creatorUsername": "black-widow",
+        "shouldIgnoreAclContent": false,
+        "assignableGrantsRequestsList": [
+            {
+                "referenceObjectType": "document",
+                "resourceId": "doc-1006",
+                "subjectType": "user",
+                "subjectId": "black-widow",
+                "rolesNamesRelationsList": [
+                    "owner"
+                ]
+            }
+        ,
+            {
+                "referenceObjectType": "document",
+                "resourceId": "doc-1006",
+                "subjectType": "user",
+                "subjectId": "ironman",
+                "rolesNamesRelationsList": [
+                    "editor"
+                ]
+            }
+        ,
+            {
+                "referenceObjectType": "document",
+                "resourceId": "doc-1006",
+                "subjectType": "user",
+                "subjectId": "spiderman",
+                "rolesNamesRelationsList": [
+                    "viewer"
+                ]
+            }
+        ,
+            {
+                "referenceObjectType": "document",
+                "resourceId": "doc-1006",
+                "subjectType": "user",
+                "subjectId": "chapolin",
+                "rolesNamesRelationsList": [
+                    "editor"
+                ]
+            }
+
+        ]
+    }
+
+]

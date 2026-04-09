@@ -1,0 +1,315 @@
+[
+    {
+        "id": "doc-1007",
+        "title": "Document-#1007",
+        "metadata": "Metadata Ninja - doc-1007",
+        "summaryContent": "Short Content - doc-1007",
+        "fullContent": "Long full Content - doc-1007",
+        "creatorUsername": "batman",
+        "shouldIgnoreAclContent": false,
+        "assignableGrantsRequestsList": [
+            {
+                "referenceObjectType": "document",
+                "resourceId": "doc-1007",
+                "subjectType": "user",
+                "subjectId": "batman",
+                "rolesNamesRelationsList": [
+                    "owner"
+                ]
+            }
+        ,
+            {
+                "referenceObjectType": "document",
+                "resourceId": "doc-1007",
+                "subjectType": "user",
+                "subjectId": "superman",
+                "rolesNamesRelationsList": [
+                    "editor"
+                ]
+            }
+        ,
+            {
+                "referenceObjectType": "document",
+                "resourceId": "doc-1007",
+                "subjectType": "user",
+                "subjectId": "wonder-woman",
+                "rolesNamesRelationsList": [
+                    "viewer"
+                ]
+            }
+        ,
+            {
+                "referenceObjectType": "document",
+                "resourceId": "doc-1007",
+                "subjectType": "user",
+                "subjectId": "chapolin",
+                "rolesNamesRelationsList": [
+                    "editor"
+                ]
+            }
+
+        ]
+    }
+,
+    {
+        "id": "doc-1008",
+        "title": "Document-#1008",
+        "metadata": "Metadata Ninja - doc-1008",
+        "summaryContent": "Short Content - doc-1008",
+        "fullContent": "Long full Content - doc-1008",
+        "creatorUsername": "superman",
+        "shouldIgnoreAclContent": false,
+        "assignableGrantsRequestsList": [
+            {
+                "referenceObjectType": "document",
+                "resourceId": "doc-1008",
+                "subjectType": "user",
+                "subjectId": "superman",
+                "rolesNamesRelationsList": [
+                    "owner"
+                ]
+            }
+        ,
+            {
+                "referenceObjectType": "document",
+                "resourceId": "doc-1008",
+                "subjectType": "user",
+                "subjectId": "wonder-woman",
+                "rolesNamesRelationsList": [
+                    "editor"
+                ]
+            }
+        ,
+            {
+                "referenceObjectType": "document",
+                "resourceId": "doc-1008",
+                "subjectType": "user",
+                "subjectId": "batman",
+                "rolesNamesRelationsList": [
+                    "viewer"
+                ]
+            }
+        ,
+            {
+                "referenceObjectType": "document",
+                "resourceId": "doc-1008",
+                "subjectType": "user",
+                "subjectId": "chapolin",
+                "rolesNamesRelationsList": [
+                    "editor"
+                ]
+            }
+
+        ]
+    }
+,
+    {
+        "id": "doc-1009",
+        "title": "Document-#1009",
+        "metadata": "Metadata Ninja - doc-1009",
+        "summaryContent": "Short Content - doc-1009",
+        "fullContent": "Long full Content - doc-1009",
+        "creatorUsername": "wonder-woman",
+        "shouldIgnoreAclContent": false,
+        "assignableGrantsRequestsList": [
+            {
+                "referenceObjectType": "document",
+                "resourceId": "doc-1009",
+                "subjectType": "user",
+                "subjectId": "wonder-woman",
+                "rolesNamesRelationsList": [
+                    "owner"
+                ]
+            }
+        ,
+            {
+                "referenceObjectType": "document",
+                "resourceId": "doc-1009",
+                "subjectType": "user",
+                "subjectId": "batman",
+                "rolesNamesRelationsList": [
+                    "editor"
+                ]
+            }
+        ,
+            {
+                "referenceObjectType": "document",
+                "resourceId": "doc-1009",
+                "subjectType": "user",
+                "subjectId": "superman",
+                "rolesNamesRelationsList": [
+                    "viewer"
+                ]
+            }
+        ,
+            {
+                "referenceObjectType": "document",
+                "resourceId": "doc-1009",
+                "subjectType": "user",
+                "subjectId": "chapolin",
+                "rolesNamesRelationsList": [
+                    "editor"
+                ]
+            }
+
+        ]
+    }
+,
+    {
+        "id": "doc-1010",
+        "title": "Document-#1010",
+        "metadata": "Metadata Ninja - doc-1010",
+        "summaryContent": "Short Content - doc-1010",
+        "fullContent": "Long full Content - doc-1010",
+        "creatorUsername": "batman",
+        "shouldIgnoreAclContent": false,
+        "assignableGrantsRequestsList": [
+            {
+                "referenceObjectType": "document",
+                "resourceId": "doc-1010",
+                "subjectType": "user",
+                "subjectId": "batman",
+                "rolesNamesRelationsList": [
+                    "owner"
+                ]
+            }
+        ,
+            {
+                "referenceObjectType": "document",
+                "resourceId": "doc-1010",
+                "subjectType": "user",
+                "subjectId": "wonder-woman",
+                "rolesNamesRelationsList": [
+                    "editor"
+                ]
+            }
+        ,
+            {
+                "referenceObjectType": "document",
+                "resourceId": "doc-1010",
+                "subjectType": "user",
+                "subjectId": "superman",
+                "rolesNamesRelationsList": [
+                    "viewer"
+                ]
+            }
+        ,
+            {
+                "referenceObjectType": "document",
+                "resourceId": "doc-1010",
+                "subjectType": "user",
+                "subjectId": "chapolin",
+                "rolesNamesRelationsList": [
+                    "editor"
+                ]
+            }
+
+
+        ]
+    }
+,
+    {
+        "id": "doc-1011",
+        "title": "Document-#1011",
+        "metadata": "Metadata Ninja - doc-1011",
+        "summaryContent": "Short Content - doc-1011",
+        "fullContent": "Long full Content - doc-1011",
+        "creatorUsername": "superman",
+        "shouldIgnoreAclContent": false,
+        "assignableGrantsRequestsList": [
+            {
+                "referenceObjectType": "document",
+                "resourceId": "doc-1011",
+                "subjectType": "user",
+                "subjectId": "superman",
+                "rolesNamesRelationsList": [
+                    "owner"
+                ]
+            }
+        ,
+            {
+                "referenceObjectType": "document",
+                "resourceId": "doc-1011",
+                "subjectType": "user",
+                "subjectId": "batman",
+                "rolesNamesRelationsList": [
+                    "editor"
+                ]
+            }
+        ,
+            {
+                "referenceObjectType": "document",
+                "resourceId": "doc-1011",
+                "subjectType": "user",
+                "subjectId": "wonder-woman",
+                "rolesNamesRelationsList": [
+                    "viewer"
+                ]
+            }
+        ,
+            {
+                "referenceObjectType": "document",
+                "resourceId": "doc-1011",
+                "subjectType": "user",
+                "subjectId": "chapolin",
+                "rolesNamesRelationsList": [
+                    "editor"
+                ]
+            }
+
+        ]
+    }
+,
+    {
+        "id": "doc-1012",
+        "title": "Document-#1012",
+        "metadata": "Metadata Ninja - doc-1012",
+        "summaryContent": "Short Content - doc-1012",
+        "fullContent": "Long full Content - doc-1012",
+        "creatorUsername": "wonder-woman",
+        "shouldIgnoreAclContent": false,
+        "assignableGrantsRequestsList": [
+            {
+                "referenceObjectType": "document",
+                "resourceId": "doc-1012",
+                "subjectType": "user",
+                "subjectId": "wonder-woman",
+                "rolesNamesRelationsList": [
+                    "owner"
+                ]
+            }
+        ,
+            {
+                "referenceObjectType": "document",
+                "resourceId": "doc-1012",
+                "subjectType": "user",
+                "subjectId": "superman",
+                "rolesNamesRelationsList": [
+                    "editor"
+                ]
+            }
+        ,
+            {
+                "referenceObjectType": "document",
+                "resourceId": "doc-1012",
+                "subjectType": "user",
+                "subjectId": "batman",
+                "rolesNamesRelationsList": [
+                    "viewer"
+                ]
+            }
+        ,
+            {
+                "referenceObjectType": "document",
+                "resourceId": "doc-1012",
+                "subjectType": "user",
+                "subjectId": "chapolin",
+                "rolesNamesRelationsList": [
+                    "editor"
+                ]
+            }
+
+        ]
+    }
+
+]

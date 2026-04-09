@@ -1,104 +1,147 @@
-# BookAnything Platform - Monolith Backend
+# ALNS ClickHouse IAM Platform
 
-![Java](https://img.shields.io/badge/Java-17-blue.svg)
-![Kotlin](https://img.shields.io/badge/Kotlin-1.9.25-blueviolet.svg)
-![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.5.3-brightgreen.svg)
-![Kafka](https://img.shields.io/badge/Apache_Kafka-2.x-lightgrey.svg)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue.svg)
-![Elasticsearch](https://img.shields.io/badge/Elasticsearch-8.x-005571.svg)
-![Docker](https://img.shields.io/badge/Docker-24.x-blue.svg)
+Spring Boot application that demonstrates user account management, authentication, and fine-grained authorization using OpenFGA.
 
-## Overview
+## Project Status
 
-This project is the first core backend service for the **BookAnything Platform**. It's a Kotlin Spring Boot application designed to manage and locate any kind of bookable/reservable entities that have a physical location. It implements a hexagonal architecture and the Command Query Responsibility Segregation (CQRS) pattern, leveraging Apache Kafka for asynchronous communication and data consistency.
+This README reflects the current implementation in this repository.
 
-This service is part of a larger monorepo, the **BookAnything-Platform**, which aims to provide a complete solution for booking and acquiring products or services.
+- Language and runtime: Java 21
+- Framework: Spring Boot 4.0.4
+- Build: Maven Wrapper (`./mvnw`)
+- Persistence: PostgreSQL (JPA/Hibernate)
+- Authorization engine: OpenFGA
+- Views: Thymeleaf MVC + REST APIs
 
-## Features
+For deeper architecture details, see `docs/ARCHITECTURE.md`.
 
-*   **Localizable Entity Management:** RESTful API for creating, retrieving, updating, and deleting records of entities with geographic locations.
-*   **Geo-spatial Queries:** Efficiently find entities within a specified radius using Elasticsearch and PostGIS.
-*   **Asynchronous GeoJSON Processing:** Upload GeoJSON files containing multiple entities, which are then processed asynchronously via Kafka.
-*   **Data Synchronization:** Manual synchronization endpoint to ensure data consistency between PostgreSQL (write-model) and Elasticsearch (read-model).
-*   **Optimized Bulk Operations:** Efficient bulk deletion of entities, leveraging Kafka events and Elasticsearch's `deleteAll` functionality.
-*   **Event-Driven Architecture:** Utilizes Kafka for event publishing to maintain data consistency.
-*   **API Documentation:** Integrated Swagger UI for interactive API exploration.
+## Main Capabilities
 
-## Architecture
+- User registration with email verification token flow
+- Form-based login with Spring Security
+- Password reset and password update workflows
+- Role/privilege model (`ROLE_ADMIN`, `ROLE_USER`, `READ_PRIVILEGE`, `WRITE_PRIVILEGE`, `CHANGE_PASSWORD_PRIVILEGE`)
+- Fine-grained, relationship-based permissions for protected resources (`document` type in OpenFGA)
+- Dashboard pages that render resources enriched with ACL/allowed-actions
+- OpenAPI docs and Actuator endpoints
 
-The project adheres to a **Hexagonal Architecture**, separating the core domain logic from external concerns (databases, messaging, APIs). It also implements **CQRS**, with PostgreSQL serving as the write-model (source of truth) and Elasticsearch as the read-model, optimized for complex queries. Kafka acts as the central nervous system for asynchronous communication and eventual consistency.
+## Package Overview
 
-## Technologies Used
+Source root: `src/main/java/com/clickhouse/alnscodingexercise`
 
-*   **Language:** Kotlin
-*   **Framework:** Spring Boot (3.5.3)
-*   **Build Tool:** Maven
-*   **Database:** PostgreSQL with PostGIS extension
-*   **Search Engine:** Elasticsearch (8.x)
-*   **Messaging:** Apache Kafka (7.6.0)
-*   **Authentication/Authorization:** Spring Security (OAuth2 Resource Server, integrated with Keycloak)
-*   **Geo-spatial Libraries:**
-    *   JTS (Java Topology Suite)
-    *   `geojson-jackson` & `jackson-datatype-jts`
-*   **API Documentation:** Springdoc OpenAPI (Swagger UI)
-*   **Containerization:** Docker, Docker Compose
+- `domains/iamplatform/account`: users, roles, privileges, tokens, account APIs/pages
+- `domains/iamplatform/authn`: user details service, login handlers, login-attempt guard
+- `domains/iamplatform/authz`: OpenFGA adapter/service, ACL DTOs, authorization annotations/aspects
+- `domains/assetmgmt`: protected resource (`ResourceThing`) model, service, REST API
+- `domains/dashboard`: MVC dashboard pages
+- `eventlisteners`: registration/resource lifecycle listeners
+- `wiring/config`: Spring MVC/Security/OpenFGA/data bootstrap configuration
 
-## Getting Started
+## API Surface (high level)
 
-### Prerequisites
+Prefixes from `AppConstants`:
 
-*   Java Development Kit (JDK) 17+
-*   Apache Maven (3.x+)
-*   Docker & Docker Compose
+- Account: `/api/iam/account`
+- Authorization helper: `/api/iam/authz`
+- Asset management: `/api/assets-mgmt`
 
-### Cloning the Repository
+Examples:
+
+- `POST /api/iam/account/registration`
+- `POST /api/iam/account/resetPassword`
+- `POST /api/iam/account/savePassword`
+- `POST /api/iam/account/updatePassword`
+- `GET /api/iam/account/resendRegistrationToken`
+- `POST /api/assets-mgmt/resources-things`
+- `GET /api/assets-mgmt/resources-things/{resourceId}`
+
+Swagger UI path (configured): `/swagger-ui.html`
+
+## Security and Authorization Model
+
+- URL-level security is configured in `SecurityConfig`.
+- Authentication uses `UserDetailsService` backed by `UserRepository`.
+- Authorities are assembled from both roles and privileges.
+- OpenFGA checks are exposed through:
+  - explicit service calls (`IAuthorizationService`)
+  - Spring expression checks in `@PreAuthorize`
+  - custom annotations/aspects (`@FgaCheck`, `@PreOpenFgaCheck`, `@PostOpenFgaCheck`)
+
+## OpenFGA Model
+
+Model files are under `src/main/resources/openfga/initial-model-tuples-data`.
+
+Current schema includes:
+
+- Types: `user`, `group`, `document`
+- Direct relations on `document`: `owner`, `editor`, `viewer`
+- Computed permissions: `can_read`, `can_write`, `can_share`, `can_delete`, `can_change_owner`
+
+Startup initialization behavior is controlled by `openfga.*` properties.
+
+## Configuration and Profiles
+
+Default config: `src/main/resources/application.yml`
+
+- Server port: `8090`
+- Actuator base path: `/management`
+- Swagger path: `/swagger-ui.html`
+- Docker Compose integration enabled (`spring.docker.compose.enabled=true`)
+
+Dockerized local profile overrides: `application-local-dockerized.yml`
+
+- Profile id: `local-dockerized`
+- Uses container hostnames for PostgreSQL, Mailhog, and OpenFGA
+
+## Local Development
+
+### 1) Start infra (PostgreSQL, OpenFGA, Mailhog, pgAdmin)
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/bookanything-platform.git
-cd bookanything-platform/1-backends/bookanything-monolith-backend-01
+docker compose -f docker-compose-infra.yml up -d
 ```
 
-### Running Dependent Services with Docker Compose
-
-Navigate to the `1-backends/bookanything-monolith-backend-01` directory and run:
+### 2) Run the app from source
 
 ```bash
-docker-compose up -d
-```
-
-This will start all required services (PostgreSQL, Kafka, Elasticsearch, etc.).
-
-### Building and Running the Spring Boot Application
-
-```bash
-# Build the project
-./mvnw clean install
-
-# Run the application
 ./mvnw spring-boot:run
 ```
 
-The application will start on `http://localhost:8080`.
+Or with dockerized profile:
 
-## API Endpoints
+```bash
+./mvnw spring-boot:run -Plocal-dockerized
+```
 
-The API documentation is available via Swagger UI at `http://localhost:8080/swagger-ui.html`.
+### 3) Useful URLs
 
-Key endpoints include:
+- Application: `http://localhost:8090`
+- Swagger UI: `http://localhost:8090/swagger-ui.html`
+- OpenAPI JSON: `http://localhost:8090/v3/api-docs`
+- Actuator health: `http://localhost:8090/management/health`
+- Mailhog UI: `http://localhost:1080`
+- OpenFGA playground: `http://localhost:3000`
+- pgAdmin: `http://localhost:16543`
 
-*   `POST /api/v1/localizable-places`: Create a new localizable entity.
-*   `GET /api/v1/localizable-places/{id}`: Retrieve an entity by ID.
-*   `GET /api/v1/localizable-places/all`: Retrieve all entities.
-*   `GET /api/v1/localizable-places/search-nearby`: Find entities within a given radius.
-*   `DELETE /api/v1/localizable-places/{id}`: Delete an entity by ID.
-*   `DELETE /api/v1/localizable-places/all`: Delete all entities.
-*   `POST /api/v1/localizable-places/synchronize`: Trigger manual data synchronization.
-*   `POST /api/v1/localizable-places/upload-geojson`: Upload a GeoJSON file for asynchronous processing.
+## Build and Test
 
-## Contributing
+Build:
 
-Contributions are welcome! Please feel free to fork the repository, open issues, or submit pull requests.
+```bash
+./mvnw clean verify
+```
 
-## License
+Unit tests only:
 
-This project is licensed under the MIT License.
+```bash
+./mvnw test
+```
+
+Integration profile wiring exists in `pom.xml` (`integration` profile), but this module currently has no project-local test classes under `src/test/java`.
+
+## Known Gaps and Notes
+
+- `README` is now aligned to current code; legacy references were removed.
+- Some code paths are explicitly incomplete (`TODO` / not implemented), including parts of resource update/delete + permission revocation flow.
+- Compose app healthcheck currently points to `/actuator/health`, while app config exposes actuator on `/management`; validate this in your environment before relying on container health status.
+- Default credentials and sample values in config/compose are development-oriented and should be externalized for production usage.

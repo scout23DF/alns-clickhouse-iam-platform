@@ -1,0 +1,84 @@
+[
+    {
+        "id": "doc-1000",
+        "title": "Document-#1000",
+        "metadata": "Metadata Ninja - doc-1000",
+        "summaryContent": "Short Content - doc-1000",
+        "fullContent": "Long full Content - doc-1000",
+        "creatorUsername": "chapolin",
+        "shouldIgnoreAclContent": false,
+        "assignableGrantsRequestsList": [
+            {
+                "referenceObjectType": "document",
+                "resourceId": "doc-1000",
+                "subjectType": "user",
+                "subjectId": "chapolin",
+                "rolesNamesRelationsList": [
+                    "owner"
+                ]
+            }
+        ,
+            {
+                "referenceObjectType": "document",
+                "resourceId": "doc-1000",
+                "subjectType": "user",
+                "subjectId": "spiderman",
+                "rolesNamesRelationsList": [
+                    "viewer"
+                ]
+            }
+        ,
+            {
+                "referenceObjectType": "document",
+                "resourceId": "doc-1000",
+                "subjectType": "user",
+                "subjectId": "ironman",
+                "rolesNamesRelationsList": [
+                    "viewer"
+                ]
+            }
+        ,
+            {
+                "referenceObjectType": "document",
+                "resourceId": "doc-1000",
+                "subjectType": "user",
+                "subjectId": "black-widow",
+                "rolesNamesRelationsList": [
+                    "viewer"
+                ]
+            }
+        ,
+            {
+                "referenceObjectType": "document",
+                "resourceId": "doc-1000",
+                "subjectType": "user",
+                "subjectId": "superman",
+                "rolesNamesRelationsList": [
+                    "viewer"
+                ]
+            }
+        ,
+            {
+                "referenceObjectType": "document",
+                "resourceId": "doc-1000",
+                "subjectType": "user",
+                "subjectId": "batman",
+                "rolesNamesRelationsList": [
+                    "viewer"
+                ]
+            }
+        ,
+            {
+                "referenceObjectType": "document",
+                "resourceId": "doc-1000",
+                "subjectType": "user",
+                "subjectId": "wonder-woman",
+                "rolesNamesRelationsList": [
+                    "viewer"
+                ]
+            }
+
+        ]
+    }
+
+]
