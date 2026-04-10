@@ -7,7 +7,7 @@ Spring Boot application that demonstrates user account management, authenticatio
 This README reflects the current implementation in this repository.
 
 - Language and runtime: Java 21
-- Framework: Spring Boot 4.0.4
+- Framework: Spring Boot 4.0.4 + Spring Security
 - Build: Maven Wrapper (`./mvnw`)
 - Persistence: PostgreSQL (JPA/Hibernate)
 - Authorization engine: OpenFGA
