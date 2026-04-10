@@ -127,7 +127,7 @@ And verify If the following infra services are started successfully:
 
 #### 2) Run the App in a totally dockerized way
 
-If you want to run this Ap in a dockerized way, its docker image will be automatically build when you issue the following:
+If you want to run this Application in a dockerized way, its docker image will be automatically build when you issue the following:
 
 - Build the App:
 ```bash

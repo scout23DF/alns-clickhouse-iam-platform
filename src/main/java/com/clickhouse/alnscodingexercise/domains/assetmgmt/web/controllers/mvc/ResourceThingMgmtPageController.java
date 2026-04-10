@@ -6,6 +6,7 @@ import com.clickhouse.alnscodingexercise.domains.assetmgmt.web.requests.CommandR
 import com.clickhouse.alnscodingexercise.domains.shared.AppConstants;
 import com.clickhouse.alnscodingexercise.domains.shared.web.utils.RequestUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,14 +20,15 @@ public class ResourceThingMgmtPageController {
     private final IResourceThingMgmtService resourceThingMgmtService;
     private final RequestUtils requestUtils;
 
-    @GetMapping("/" + AppConstants.DEFAULT_PAGES_ASSETSMGMT_PREFIX_PATH + "/resources-things" + "/edit/{id}")
-    public String showUpdateForm(@PathVariable String id, Model model) {
+    @GetMapping("/" + AppConstants.DEFAULT_PAGES_ASSETSMGMT_PREFIX_PATH + "/resources-things" + "/edit/{resourceThingId}")
+    @PreAuthorize("@authorizationUtils.checkFGAPermission(#resourceThingId, 'document', 'can_write', 'user', authentication?.name)")
+    public String showUpdateForm(@PathVariable String resourceThingId, Model model) {
 
         ResourceThingDTO foundResourceThing = resourceThingMgmtService.searchByContainingText(
-                id,
+                resourceThingId,
                 "id")
                 .stream().findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Any ResourceThing found for Id:" + id));
+                .orElseThrow(() -> new IllegalArgumentException("Any ResourceThing found for Id:" + resourceThingId));
 
         model.addAttribute("targetResourceThing", foundResourceThing);
         model.addAttribute("authenticatedUser", requestUtils.getCurrentAuthenticatedUser());
@@ -35,12 +37,13 @@ public class ResourceThingMgmtPageController {
 
     }
 
-    @PostMapping("/" + AppConstants.DEFAULT_PAGES_ASSETSMGMT_PREFIX_PATH + "/resources-things" + "/update/{id}")
-    public String updateItem(@PathVariable String id, ResourceThingDTO targetResourceThing) {
+    @PostMapping("/" + AppConstants.DEFAULT_PAGES_ASSETSMGMT_PREFIX_PATH + "/resources-things" + "/update/{resourceThingId}")
+    @PreAuthorize("@authorizationUtils.checkFGAPermission(#resourceThingId, 'document', 'can_write', 'user', authentication?.name)")
+    public String updateItem(@PathVariable String resourceThingId, ResourceThingDTO targetResourceThing) {
 
         ResourceThingDTO updatedResourceThing = resourceThingMgmtService.updateResourceThing(
                 CommandResourceThingDTO.builder()
-                        .id(id)
+                        .id(resourceThingId)
                         .title(targetResourceThing.title())
                         .metadata(targetResourceThing.metadata())
                         .summaryContent(targetResourceThing.summaryContent())
@@ -53,14 +56,15 @@ public class ResourceThingMgmtPageController {
         return "redirect:/" + AppConstants.DEFAULT_PAGES_DASHBOARD_PREFIX_PATH + "/handlePortalHome";
     }
 
-    @GetMapping("/" + AppConstants.DEFAULT_PAGES_ASSETSMGMT_PREFIX_PATH + "/resources-things" + "/view/{id}")
-    public String showViewForm(@PathVariable String id, Model model) {
+    @GetMapping("/" + AppConstants.DEFAULT_PAGES_ASSETSMGMT_PREFIX_PATH + "/resources-things" + "/view/{resourceThingId}")
+    @PreAuthorize("@authorizationUtils.checkFGAPermission(#resourceThingId, 'document', 'can_read', 'user', authentication?.name)")
+    public String showViewForm(@PathVariable String resourceThingId, Model model) {
 
         ResourceThingDTO foundResourceThing = resourceThingMgmtService.searchByContainingText(
-                        id,
+                        resourceThingId,
                         "id")
                 .stream().findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Any ResourceThing found for Id:" + id));
+                .orElseThrow(() -> new IllegalArgumentException("Any ResourceThing found for Id:" + resourceThingId));
 
         model.addAttribute("targetResourceThing", foundResourceThing);
         model.addAttribute("authenticatedUser", requestUtils.getCurrentAuthenticatedUser());
@@ -68,31 +72,4 @@ public class ResourceThingMgmtPageController {
         return AppConstants.DEFAULT_PAGES_ASSETSMGMT_PREFIX_PATH + "/resource-thing-view-form";
 
     }
-
-    /*
-    @GetMapping("/")
-    public String listItems(Model model) {
-        model.addAttribute("items", itemRepository.findAll());
-        return "list";
-    }
-
-    @GetMapping("/add")
-    public String showAddForm(Item item) {
-        return "add-item";
-    }
-
-    @PostMapping("/add")
-    public String addItem(Item item) {
-        itemRepository.save(item);
-        return "redirect:/";
-    }
-
-    @GetMapping("/delete/{id}")
-    public String deleteItem(@PathVariable("id") long id) {
-        Item item = itemRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid item Id:" + id));
-        itemRepository.delete(item);
-        return "redirect:/";
-    }
-    */
 }
