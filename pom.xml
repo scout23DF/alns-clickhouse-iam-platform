@@ -120,44 +120,6 @@
         </dependency>
 
 
-        <!-- Dependencies to be Verified and Cleaned Up -->
-        <!-- Utility Libraries -->
-        <!--
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-oauth2-client</artifactId>
-        </dependency>
-        -->
-        <!-- DigitalSanctuary Spring User Framework -->
-        <!--
-        <dependency>
-            <groupId>com.digitalsanctuary</groupId>
-            <artifactId>ds-spring-chUserAccount-framework</artifactId>
-            <version>4.3.1</version>
-        </dependency>
-        -->
-        <!-- 2fa -->
-        <!--
-        <dependency>
-            <groupId>org.jboss.aerogear</groupId>
-            <artifactId>aerogear-otp-java</artifactId>
-            <version>${aerogear.version}</version>
-            <scope>compile</scope>
-        </dependency>
-        -->
-        <!-- Servlet -->
-        <!--
-        <dependency>
-            <groupId>jakarta.servlet</groupId>
-            <artifactId>jakarta.servlet-api</artifactId>
-            <version>${jakarta.servlet-api.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>jakarta.el</groupId>
-            <artifactId>jakarta.el-api</artifactId>
-            <version>${jakarta.el.version}</version>
-        </dependency>
-        -->
         <!-- Password Validation -->
         <dependency>
             <groupId>org.passay</groupId>
@@ -170,28 +132,6 @@
             <version>33.5.0-jre</version>
         </dependency>
 
-        <!-- User Agent parser -->
-        <!--
-        <dependency>
-            <groupId>com.github.ua-parser</groupId>
-            <artifactId>uap-java</artifactId>
-            <version>${uap-java.version}</version>
-        </dependency>
-        -->
-        <!-- maxmind dependency -->
-        <!--
-        <dependency>
-            <groupId>com.maxmind.geoip2</groupId>
-            <artifactId>geoip2</artifactId>
-            <version>${geoip2.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.hibernate.validator</groupId>
-            <artifactId>hibernate-validator</artifactId>
-        </dependency>
-        -->
-        <!-- END - Libraries to Verify the real need  -->
-
         <!-- Compile-only Dependencies -->
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -199,7 +139,6 @@
             <scope>provided</scope>
             <optional>true</optional>
         </dependency>
-
 
         <!-- OpenAPI (Swagger) -->
         <dependency>
@@ -257,7 +196,6 @@
             <artifactId>spring-security-test</artifactId>
             <scope>test</scope>
         </dependency>
-
         <dependency>
             <groupId>io.rest-assured</groupId>
             <artifactId>rest-assured</artifactId>
@@ -268,39 +206,6 @@
             <groupId>org.junit.platform</groupId>
             <artifactId>junit-platform-runner</artifactId>
             <version>1.9.3</version>
-            <scope>test</scope>
-        </dependency>
-
-        <!-- OAuth2 Testing Dependencies -->
-        <dependency>
-            <groupId>org.wiremock</groupId>
-            <artifactId>wiremock-standalone</artifactId>
-            <version>3.13.2</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.jsonwebtoken</groupId>
-            <artifactId>jjwt-api</artifactId>
-            <version>0.13.0</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.jsonwebtoken</groupId>
-            <artifactId>jjwt-impl</artifactId>
-            <version>0.13.0</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.jsonwebtoken</groupId>
-            <artifactId>jjwt-jackson</artifactId>
-            <version>0.13.0</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-            <version>2.4.240</version>
             <scope>test</scope>
         </dependency>
 
@@ -355,12 +260,9 @@
                     </includes>
 					<excludes>
 						<exclude>**/*IT*</exclude>
-						<exclude>**/*CucumberTest*</exclude>
                         <exclude>**/*IntegrationTest.java</exclude>
-                        <exclude>**/*LiveTest.java</exclude>
 					</excludes>
                     <systemPropertyVariables>
-                        <!-- <provPersistenceTarget>h2</provPersistenceTarget> -->
                     </systemPropertyVariables>
 				</configuration>
             </plugin>
@@ -387,9 +289,7 @@
 					<runOrder>alphabetical</runOrder>
 					<includes>
 						<include>**/*IT*</include>
-						<include>**/*CucumberTest*</include>
                         <include>**/*IntegrationTest.java</include>
-                        <include>**/*LiveTest.java</include>
 					</includes>
 				</configuration>
 			</plugin>
@@ -470,44 +370,6 @@
                 <spring.profiles.active>local-dockerized</spring.profiles.active>
             </properties>
         </profile>
-
-
-
-
-        <!-- Baeldung -->
-        <profile>
-            <id>integration</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-surefire-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <phase>integration-test</phase>
-                                <goals>
-                                    <goal>test</goal>
-                                </goals>
-                                <configuration>
-                                    <excludes>
-                                        <exclude>**/*LiveTest.java</exclude>
-                                    </excludes>
-                                    <includes>
-                                        <include>**/*IntegrationTest.java</include>
-                                    </includes>
-                                </configuration>
-                            </execution>
-                        </executions>
-                        <configuration>
-                            <systemPropertyVariables>
-                                <test.mime>json</test.mime>
-                            </systemPropertyVariables>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-
 
 	</profiles>	
 

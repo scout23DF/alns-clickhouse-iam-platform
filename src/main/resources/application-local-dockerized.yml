@@ -53,6 +53,10 @@ spring:
 
 openfga:
     fga-api-url: http://alnsclickhousetest-infra-openfga-server:8080
-    # fga-store-id: 01KNBXTRD2Q49YDQE6W94018X8
-    # fga-authorization-model-id: 01KNBXW5EW2CPZ6G9PFTBJ1VVT
-    # fga-should-import-initial-structure: false
+    fga-store-id: 01KNPEF94P3M84GPHNZBH0RSD2
+    fga-store-name: clickhouse-iam-fga-store
+    fga-authorization-model-id: 01KNPEF9DK0ZAM18RM1YAN6SJP
+    fga-should-import-initial-structure: false
+    fga-initial-model-schema-to-import: classpath:openfga/initial-model-tuples-data/domain-assetmgmt-resourcething-model-schema.json
+    fga-initial-relationship-tuples-to-import:
+        - classpath:openfga/initial-model-tuples-data/domain-assetmgmt-resourcething-tuples-example-data.json

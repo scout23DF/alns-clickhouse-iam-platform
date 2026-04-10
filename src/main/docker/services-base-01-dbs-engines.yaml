@@ -26,8 +26,9 @@ services:
       retries: 5
     volumes:
       - ./postgresql/init-configs/init-scripts/01-create-roles-users-dbs-schemas.sql:/docker-entrypoint-initdb.d/01-create-roles-users-dbs-schemas.sql:ro
-      - ./postgresql/init-configs/init-scripts/02-keycloak-db-dump-to-load-01.sql:/docker-entrypoint-initdb.d/02-keycloak-db-dump-to-load-01.sql:ro
-      - ./postgresql/init-configs/init-scripts/03-dbs-clickhouse-apps-dump-to-load.sql:/docker-entrypoint-initdb.d/03-dbs-clickhouse-apps-dump-to-load.sql:ro
+      - ./postgresql/init-configs/init-scripts/02-openfga-db-dump-to-load-01.sql:/docker-entrypoint-initdb.d/02-openfga-db-dump-to-load-01.sql:ro
+      - ./postgresql/init-configs/init-scripts/03-keycloak-db-dump-to-load-01.sql:/docker-entrypoint-initdb.d/03-keycloak-db-dump-to-load-01.sql:ro
+      - ./postgresql/init-configs/init-scripts/10-dbs-clickhouse-apps-dump-to-load.sql:/docker-entrypoint-initdb.d/10-dbs-clickhouse-apps-dump-to-load.sql:ro
       - postgresql-data-volume-01:/var/lib/postgresql:rw,delegated
     networks:
       alnsclickhousetest-network-dev1-01:
