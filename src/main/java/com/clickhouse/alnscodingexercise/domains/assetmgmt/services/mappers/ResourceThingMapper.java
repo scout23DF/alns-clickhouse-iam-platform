@@ -68,9 +68,9 @@ public class ResourceThingMapper {
 
         if (commandResourceThing != null) {
             foundResourceThing.setTitle(commandResourceThing.title());
-            foundResourceThing.setMetadata(commandResourceThing.metadata() + " :: [Updated]");
-            foundResourceThing.setSummaryContent(commandResourceThing.summaryContent() + " :: [Updated]");
-            foundResourceThing.setFullContent(commandResourceThing.fullContent() + " :: [Updated]");
+            foundResourceThing.setMetadata(commandResourceThing.metadata());
+            foundResourceThing.setSummaryContent(commandResourceThing.summaryContent());
+            foundResourceThing.setFullContent(commandResourceThing.fullContent());
             foundResourceThing.setUpdatedAt(Instant.now());
 
             if (StringUtils.isNotEmpty(commandResourceThing.creatorUsername())

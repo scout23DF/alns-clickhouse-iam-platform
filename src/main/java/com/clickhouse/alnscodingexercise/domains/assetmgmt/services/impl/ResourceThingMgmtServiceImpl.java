@@ -15,8 +15,8 @@ import com.clickhouse.alnscodingexercise.domains.iamplatform.authz.validation.Au
 import com.clickhouse.alnscodingexercise.domains.shared.models.enums.GenericOperationResultEnum;
 import com.clickhouse.alnscodingexercise.eventlisteners.events.OnResourceThingCreatedOrUpdatedEvent;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -70,7 +70,7 @@ public class ResourceThingMgmtServiceImpl implements IResourceThingMgmtService {
 
     @Override
     public ResourceThingDTO updateResourceThing(CommandResourceThingDTO commandResourceThing) {
-        throw new NotImplementedException();
+        return this.doCreateOrUpdateResourceThing(commandResourceThing, false);
     }
 
     @Override
@@ -83,7 +83,7 @@ public class ResourceThingMgmtServiceImpl implements IResourceThingMgmtService {
             case "title" -> resourceThingRepository.findByTitleLikeIgnoreCase(searchText).stream()
                     .map(resourceThingMapper::entityToDTO)
                     .toList();
-            default -> resourceThingRepository.findAll().stream()
+            default -> resourceThingRepository.findAll(Sort.by("id")).stream()
                     .map(resourceThingMapper::entityToDTO)
                     .toList();
         };

@@ -6,13 +6,12 @@ import com.clickhouse.alnscodingexercise.domains.iamplatform.account.models.enti
 import com.clickhouse.alnscodingexercise.domains.iamplatform.account.services.IUserAccountMgmtService;
 import com.clickhouse.alnscodingexercise.domains.iamplatform.authz.models.dtos.GenericObjectEnrichedWithACLDTO;
 import com.clickhouse.alnscodingexercise.domains.shared.AppConstants;
+import com.clickhouse.alnscodingexercise.domains.shared.web.utils.RequestUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,6 +30,7 @@ public class DashboardPageController {
 
     private final IUserAccountMgmtService userAccountMgmtService;
     private final IResourceThingMgmtService resourceThingMgmtService;
+    private final RequestUtils requestUtils;
     private final MessageSource messages;
 
     @GetMapping(AppConstants.DEFAULT_PAGES_DASHBOARD_PREFIX_PATH + "/handlePortalHome")
@@ -45,14 +45,7 @@ public class DashboardPageController {
                 }
         );
 
-        CHUserAccount authenticatedUser;
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication.getPrincipal() instanceof CHUserAccount) {
-            authenticatedUser = (CHUserAccount) authentication.getPrincipal();
-        } else {
-            String username = authentication.getName();
-            authenticatedUser = userAccountMgmtService.getUserByUsername(username);
-        }
+        CHUserAccount authenticatedUser = requestUtils.getCurrentAuthenticatedUser();
 
         List<GenericObjectEnrichedWithACLDTO<ResourceThingDTO>> resourcesThingsWithAclList = resourceThingMgmtService.listAllWithAclForUser(
                 authenticatedUser

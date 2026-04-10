@@ -95,23 +95,71 @@ Dockerized local profile overrides: `application-local-dockerized.yml`
 
 ## Local Development
 
-### 1) Start infra (PostgreSQL, OpenFGA, Mailhog, pgAdmin)
+### Build
+
+This project relies on Maven as its build tool. You can build a runnable .jar package, by issuing:
 
 ```bash
-docker compose -f docker-compose-infra.yml up -d
+./mvnw clean package -DskipTests
 ```
+Find the built package at: `./target/alns-clickhouse-iam-platform.jar`
 
-### 2) Run the app from source
+### How to Run locally:
+
+This app also relies on Docker-Compose to make available locally some needed services (Take a look at the `docker-compose-infra.yml` file).
+
+Follow the instructions below, depending on how you wish to run this app:
+
+#### 1) Run the app from source (from Terminal CLI)
+
+By default, this App takes advantage of Spring-Boot and Docker-Compose integration. 
+This means that when the App starts using its default profile, automatically the services described at `docker-compose-infra.yml` will start before, initializing the App itself.
+Therefore, only type:
 
 ```bash
-./mvnw spring-boot:run
+./mvnw spring-boot:run -DskipTests
+```
+And verify If the following infra services are started successfully: 
+- PostgreSQL;
+- OpenFGA;
+- Mailhog;
+- pgAdmin.
+
+#### 2) Run the App in a totally dockerized way
+
+If you want to run this Ap in a dockerized way, its docker image will be automatically build when you issue the following:
+
+- Build the App:
+```bash
+./mvnw clean package -DskipTests
 ```
 
-Or with dockerized profile:
+And then:
 
 ```bash
-./mvnw spring-boot:run -Plocal-dockerized
+./docker-compose -f docker-compose.yml up -d --build
 ```
+
+### Testing
+
+Unit tests only:
+
+```bash
+./mvnw test
+```
+Integration profile wiring exists in `pom.xml` (`integration` profile), but this module currently has no project-local test classes under `src/test/java`.
+
+[TBD]: The tests must be implemented. 
+
+For the sake of manual testing and simulations, consider the following:
+
+- When the PostgreSQL container starts, some SQL scripts run to create the database objects, as well as, some sample data are loaded;
+- After a fresh build and starting, the App has the following data:
+  - 07 Users Accounts: `chapolin`, `spiderman`, `ironman`, `black-widow`, `batman`, `superman`, `wonder-woman`
+  - Same Password for all: `Demo@159`
+  - Each User Account is assigned to at least one OpenFGA relation: `owner`, `editor` and/or `viewer`.  
+  - 13 Resources, which were associated to the Users Accounts above, by OpenFGA relations.
+- You can use the Swagger-UI Endpoints. There are some JSON files at `src/test/resources` which can be used to Create/Update some `Resources` and their Permissions in OpenFGA way.
 
 ### 3) Useful URLs
 
@@ -123,25 +171,10 @@ Or with dockerized profile:
 - OpenFGA playground: `http://localhost:3000`
 - pgAdmin: `http://localhost:16543`
 
-## Build and Test
-
-Build:
-
-```bash
-./mvnw clean verify
-```
-
-Unit tests only:
-
-```bash
-./mvnw test
-```
-
-Integration profile wiring exists in `pom.xml` (`integration` profile), but this module currently has no project-local test classes under `src/test/java`.
-
 ## Known Gaps and Notes
 
-- `README` is now aligned to current code; legacy references were removed.
+- All the Tests must be implemented.
 - Some code paths are explicitly incomplete (`TODO` / not implemented), including parts of resource update/delete + permission revocation flow.
 - Compose app healthcheck currently points to `/actuator/health`, while app config exposes actuator on `/management`; validate this in your environment before relying on container health status.
 - Default credentials and sample values in config/compose are development-oriented and should be externalized for production usage.
+ 

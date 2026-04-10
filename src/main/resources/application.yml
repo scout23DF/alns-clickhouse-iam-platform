@@ -65,8 +65,8 @@ spring:
                 query:
                     fail_on_pagination_over_collection_fetch: true
                     in_clause_parameter_padding: true
-                show_sql: false
-                format_sql: true
+                show_sql: true
+                format_sql: false
                 dialect: org.hibernate.dialect.PostgreSQLDialect
     data:
         jpa:

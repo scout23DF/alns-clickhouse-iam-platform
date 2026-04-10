@@ -10,6 +10,7 @@ public class AppConstants {
     public static final String DEFAULT_PAGES_IAM_AUTHN_PREFIX_PATH = "pages/iam/authn";
     public static final String DEFAULT_PAGES_IAM_AUTHZ_PREFIX_PATH = "pages/iam/authz";
     public static final String DEFAULT_PAGES_DASHBOARD_PREFIX_PATH = "pages/dashboard";
+    public static final String DEFAULT_PAGES_ASSETSMGMT_PREFIX_PATH = "pages/assets-mgmt";
 
     public static final String DEFAULT_API_IAM_ACCOUNT_PREFIX_PATH = "/api/iam/account";
     public static final String DEFAULT_API_IAM_AUTHZ_PREFIX_PATH = "/api/iam/authz";
