@@ -538,7 +538,10 @@ public class OpenFGAAdapter {
                 .filter(result -> result.getCorrelationId().equals(String.valueOf(index)))
                 .findFirst()
                 .map(ClientBatchCheckSingleResponse::isAllowed)
-                .orElseThrow(() -> new RuntimeException("No assertion found in BatchCheckResponse for correlationId: " + index));
+                .orElseGet(() -> {
+                    LOGGER.warn("No assertion found in BatchCheckResponse for correlationId: {}. Defaulting to false.", index);
+                    return Boolean.FALSE;
+                });
     }
 
 }

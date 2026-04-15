@@ -5,6 +5,7 @@ import com.clickhouse.alnscodingexercise.domains.iamplatform.authz.services.IAut
 import com.clickhouse.alnscodingexercise.domains.iamplatform.authz.services.impl.adapters.OpenFGAAdapter;
 import com.clickhouse.alnscodingexercise.wiring.config.OpenFgaProperties;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.security.access.AuthorizationServiceException;
 import org.springframework.stereotype.Service;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class AuthorizationServiceImpl implements IAuthorizationService {
 
@@ -101,10 +103,18 @@ public class AuthorizationServiceImpl implements IAuthorizationService {
         resultOperationOpenFgaDTO = openFGAAdapter.getAllowedActionsOf(userResourceToVerify);
 
         if (resultOperationOpenFgaDTO.occurredException() != null) {
-            throw new AuthorizationServiceException(
-                    "Error getting Allowed Actions for: " + userResourceToVerify,
-                    resultOperationOpenFgaDTO.occurredException()
-            );
+            log.warn("Error getting allowed actions for {}. Defaulting all actions to false.", userResourceToVerify,
+                    resultOperationOpenFgaDTO.occurredException());
+
+            return AllowedActionsDTO.builder()
+                    .objectType(userResourceToVerify.getResourceType())
+                    .objectId(userResourceToVerify.getResourceId())
+                    .canChangeOwner(Boolean.FALSE)
+                    .canDelete(Boolean.FALSE)
+                    .canShare(Boolean.FALSE)
+                    .canWrite(Boolean.FALSE)
+                    .canRead(Boolean.FALSE)
+                    .build();
         }
 
         return resultOperationOpenFgaDTO.responseFromFga();

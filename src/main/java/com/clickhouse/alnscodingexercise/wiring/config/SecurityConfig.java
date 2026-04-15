@@ -1,8 +1,8 @@
 package com.clickhouse.alnscodingexercise.wiring.config;
 
 import com.clickhouse.alnscodingexercise.domains.iamplatform.account.repositories.UserRepository;
-import com.clickhouse.alnscodingexercise.domains.iamplatform.authn.models.dtos.ActiveUserStoreDTO;
 import com.clickhouse.alnscodingexercise.domains.iamplatform.authn.handlers.CustomWebSecurityExpressionHandler;
+import com.clickhouse.alnscodingexercise.domains.iamplatform.authn.models.dtos.ActiveUserStoreDTO;
 import com.clickhouse.alnscodingexercise.domains.shared.AppConstants;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -25,7 +25,6 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
-import org.springframework.security.web.session.HttpSessionEventPublisher;
 
 // @ImportResource({ "classpath:webSecurityConfig.xml" })
 @Configuration
@@ -58,7 +57,7 @@ public class SecurityConfig {
                             "/swagger-ui/**",
                             "/swagger-ui.html",
                             "/v3/api-docs/**",
-                            "/api/**",
+                            "/global-error-show.html*",
                             "/login*",
                             "/pages/iam/authn/doLogin*",
                             "/logout*",
@@ -78,7 +77,8 @@ public class SecurityConfig {
                             "/" + AppConstants.DEFAULT_PAGES_IAM_ACCOUNT_PREFIX_PATH + "/changePassword*",
                             "/" + AppConstants.DEFAULT_PAGES_IAM_ACCOUNT_PREFIX_PATH + "/emailError*",
                             "/resources/**",
-                            "/" + AppConstants.DEFAULT_PAGES_IAM_ACCOUNT_PREFIX_PATH + "/successRegister*")
+                            "/" + AppConstants.DEFAULT_PAGES_IAM_ACCOUNT_PREFIX_PATH + "/successRegister*",
+                            "/api/**")
                     .permitAll()
                     .requestMatchers("/invalidSession*")
                     .anonymous()
@@ -90,13 +90,12 @@ public class SecurityConfig {
                     .anyRequest()
                     .hasAuthority("READ_PRIVILEGE");
             })
-            .formLogin((formLogin) -> formLogin // .loginPage(AppConstants.DEFAULT_APP_AUTHN_PREFIX_PATH + "/do-login")
+            .formLogin((formLogin) -> formLogin
                 .loginPage("/" + AppConstants.DEFAULT_PAGES_IAM_AUTHN_PREFIX_PATH + "/doLogin")
                 .defaultSuccessUrl("/homepage.html")
                 .failureUrl("/" + AppConstants.DEFAULT_PAGES_IAM_AUTHN_PREFIX_PATH + "/doLogin?error=true")
                 .successHandler(myAuthenticationSuccessHandler)
                 .failureHandler(authenticationFailureHandler)
-                // .authenticationDetailsSource(authenticationDetailsSource)
                 .permitAll()
             )
             .sessionManagement((sessionManagement) -> sessionManagement.invalidSessionUrl("/invalidSession.html")
@@ -107,7 +106,7 @@ public class SecurityConfig {
                 .logoutSuccessUrl("/" + AppConstants.DEFAULT_PAGES_IAM_AUTHN_PREFIX_PATH + "/logout.html?logSucc=true")
                 .deleteCookies("JSESSIONID")
                 .permitAll())
-            ; // .rememberMe((remember) -> remember.rememberMeServices(rememberMeServices()));
+            ;
 
         return http.build();
     }
@@ -138,16 +137,16 @@ public class SecurityConfig {
     }
 
     @Bean
-    public HttpSessionEventPublisher httpSessionEventPublisher() {
-        return new HttpSessionEventPublisher();
-    }
-
-    @Bean
     public ActiveUserStoreDTO activeUserStore() {
         return new ActiveUserStoreDTO();
     }
 
     /*
+    @Bean
+    public HttpSessionEventPublisher httpSessionEventPublisher() {
+        return new HttpSessionEventPublisher();
+    }
+
     @Bean
     public DaoAuthenticationProvider authProvider() {
         final CustomAuthenticationProvider authProvider = new CustomAuthenticationProvider(this.userDetailsService);

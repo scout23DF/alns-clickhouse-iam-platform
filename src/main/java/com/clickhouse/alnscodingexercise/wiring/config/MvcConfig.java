@@ -3,6 +3,7 @@ package com.clickhouse.alnscodingexercise.wiring.config;
 import com.clickhouse.alnscodingexercise.domains.iamplatform.account.validation.EmailValidator;
 import com.clickhouse.alnscodingexercise.domains.iamplatform.account.validation.PasswordMatchesValidator;
 import com.clickhouse.alnscodingexercise.domains.shared.AppConstants;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.web.server.WebServerFactoryCustomizer;
@@ -21,22 +22,24 @@ import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 import java.util.Locale;
 
 @Configuration
-@EnableWebMvc
+@RequiredArgsConstructor
 public class MvcConfig implements WebMvcConfigurer {
 
-    @Autowired
-    private MessageSource messageSource;
+    private final MessageSource messageSource;
 
+    /*
     public MvcConfig(MessageSource messageSource) {
         super();
         this.messageSource = messageSource;
     }
+    */
 
     @Override
     public void addViewControllers(final ViewControllerRegistry registry) {
         registry.addViewController("/").setViewName("forward:" + AppConstants.DEFAULT_PAGES_IAM_AUTHN_PREFIX_PATH + "/doLogin");
         registry.addViewController("/home.html");
         registry.addViewController("/invalidSession.html");
+        registry.addViewController("/global-error-show.html");
 
         registry.addViewController(AppConstants.DEFAULT_PAGES_DASHBOARD_PREFIX_PATH + "/protected/dashboard-index.html");
         registry.addViewController(AppConstants.DEFAULT_PAGES_DASHBOARD_PREFIX_PATH + "/protected/admin/admin.html");

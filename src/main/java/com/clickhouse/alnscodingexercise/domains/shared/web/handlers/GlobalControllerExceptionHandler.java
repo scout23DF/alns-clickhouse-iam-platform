@@ -20,10 +20,14 @@ public class GlobalControllerExceptionHandler {
     private final MessageSource messages;
 
 
-    public static final String DEFAULT_ERROR_VIEW = "error";
+    public static final String DEFAULT_ERROR_VIEW = "global-error-show";
 
     @ExceptionHandler(value = Exception.class)
     public ModelAndView defaultErrorHandler(HttpServletRequest req, Exception e) throws Exception {
+        if (req.getRequestURI() != null && req.getRequestURI().startsWith("/api/")) {
+            throw e;
+        }
+
         // If the exception is annotated with @ResponseStatus rethrow it and let
         // the framework handle it - like the OrderNotFoundException example
         // at the start of this post.
